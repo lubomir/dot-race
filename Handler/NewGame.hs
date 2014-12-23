@@ -2,8 +2,25 @@ module Handler.NewGame where
 
 import Import
 
+import Yesod.Form.Bootstrap3
+
+data NewGame = NewGame { track :: Text
+                       , numPlayers :: Int
+                       }
+
+newGameForm :: Form NewGame
+newGameForm = renderBootstrap3 BootstrapBasicForm $ NewGame
+    <$> areq textField (bfs MsgTrack)               Nothing
+    <*> areq intField  (addMin $ bfs MsgNumPlayers) Nothing
+  where
+    addMin fs = fs { fsAttrs = ("min", "1") : fsAttrs fs }
+
 getNewGameR :: Handler Html
-getNewGameR = error "Not yet implemented: getNewGameR"
+getNewGameR = do
+    (widget, enctype) <- generateFormPost newGameForm
+    defaultLayout $ do
+        setTitleI MsgNewGame
+        $(widgetFile "new-game")
 
 postNewGameR :: Handler Html
 postNewGameR = error "Not yet implemented: postNewGameR"
