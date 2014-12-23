@@ -16,6 +16,7 @@ data App = App
     , appHttpManager       :: Manager
     , appLogger            :: Logger
     , appFayCommandHandler :: CommandHandler App
+    , appTracks            :: Map Text Track
     }
 
 instance HasHttpManager App where

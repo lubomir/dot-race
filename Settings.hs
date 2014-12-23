@@ -50,6 +50,8 @@ data AppSettings = AppSettings
     -- ^ Copyright text to appear in the footer of the page
     , appAnalytics              :: Maybe Text
     -- ^ Google Analytics code
+    , appTracksDir              :: FilePath
+    -- ^ Directory with track definitions
     }
 
 instance FromJSON AppSettings where
@@ -74,6 +76,7 @@ instance FromJSON AppSettings where
 
         appCopyright              <- o .: "copyright"
         appAnalytics              <- o .:? "analytics"
+        appTracksDir              <- fromString <$> o .: "tracks-dir"
 
         return AppSettings {..}
 

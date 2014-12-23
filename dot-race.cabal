@@ -24,6 +24,7 @@ library
                      Handler.Fay
                      Handler.Home
                      Handler.NewGame
+                     DotRace.Track
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
@@ -82,6 +83,7 @@ library
                  , vector
                  , time
                  , fay-dom
+                 , system-filepath
 
 executable         dot-race
     if flag(library-only)

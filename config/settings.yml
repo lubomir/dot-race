@@ -19,3 +19,4 @@ ip-from-header: "_env:IP_FROM_HEADER:false"
 
 copyright: Insert copyright statement here
 #analytics: UA-YOURCODE
+tracks-dir: data/tracks
