@@ -5,3 +5,4 @@
 /robots.txt RobotsR GET
 
 / NewGameR GET POST
+/game/#GameId GameR GET

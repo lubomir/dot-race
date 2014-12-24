@@ -24,6 +24,7 @@ library
                      Handler.Fay
                      Handler.Home
                      Handler.NewGame
+                     Handler.Game
                      DotRace.Game
                      DotRace.Track
 
