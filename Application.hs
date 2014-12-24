@@ -6,12 +6,6 @@ module Application
     , makeFoundation
     ) where
 
-import Data.Yaml                   (decodeEither')
-import Data.Aeson                  (Result (..), fromJSON)
-import Control.Exception           (throw)
-import Filesystem.Path.CurrentOS
-import Data.Text (replace, toTitle)
-import qualified Data.Map.Strict as M
 import Control.Monad.Logger                 (liftLoc)
 import Import
 import Language.Haskell.TH.Syntax           (qLocation)
@@ -26,7 +20,6 @@ import Network.Wai.Middleware.RequestLogger (Destination (Logger),
 import System.Log.FastLogger                (defaultBufSize, newStdoutLoggerSet,
                                              toLogStr)
 import Yesod.Fay                            (getFaySite)
-import System.Directory
 
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
@@ -58,24 +51,6 @@ makeFoundation appSettings = do
 
     -- Return the foundation
     return App {..}
-
-loadTracks :: FilePath -> IO (Map Text Track)
-loadTracks dir = do
-    files <- map fromString <$> getDirectoryContents (fpToString dir)
-    M.fromList <$> mapM loadTrack (filter isYaml files)
-  where
-    loadTrack :: FilePath -> IO (Text, Track)
-    loadTrack p = do
-        let name = getName p
-        val <- (either throw id . decodeEither') <$> readFile (dir </> p)
-        case fromJSON val of
-            Error e -> error e
-            Success track -> return (name, track)
-
-    getName :: FilePath -> Text
-    getName = toTitle . replace "-" " " . either id id . toText . basename
-
-    isYaml p = p `hasExtension` "yaml"
 
 -- | Convert our foundation to a WAI Application by calling @toWaiAppPlain@ and
 -- applyng some additional middlewares.
