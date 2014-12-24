@@ -1,0 +1,3 @@
+<form enctype=#{enctype}>
+    ^{widget}
+    <button type="submit" .btn .btn-default>_{MsgCreateGame}
