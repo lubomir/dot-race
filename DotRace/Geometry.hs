@@ -1,5 +1,12 @@
 module DotRace.Geometry where
 
+#ifndef FAY
+import Prelude
+import Data.Aeson
+import Control.Applicative
+import Data.Monoid
+#endif
+
 -- $setup
 -- >>> :{
 --  let path = zipWith P [0, 4, 7,  6,  1, -1, -3, -6, -7, -3]
@@ -28,6 +35,16 @@ data Point = P { _x :: Double
 
 instance Eq Point where
     (P x1 y1) == (P x2 y2) = almostEqual x1 x2 && almostEqual y1 y2
+
+#ifndef FAY
+instance FromJSON Point where
+    parseJSON (Object o) = P <$> o .: "x" <*> o .: "y"
+    parseJSON arr@(Array _) = uncurry P <$> parseJSON arr
+    parseJSON _ = mempty
+
+instance ToJSON Point where
+    toJSON (P x y) = toJSON (x, y)
+#endif
 
 
 -- |Compute length of the hypothenuse of a right-angled triangle with sides of
@@ -203,7 +220,8 @@ type Polygon = Path
 -- ["0.0x0.0--0.0x1.0","0.0x1.0--1.0x1.0","1.0x1.0--1.0x0.0","1.0x0.0--0.0x0.0"]
 --
 getSegments :: Polygon -> [Line]
-getSegments pg = zipWith Line pg (tail pg ++ [head pg])
+getSegments [] = []
+getSegments pg@(p:ps) = zipWith Line pg (ps ++ [p])
 
 -- |Check if a point lies inside a polygon.
 --
