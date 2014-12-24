@@ -1,4 +1,4 @@
-module Geometry where
+module DotRace.Geometry where
 
 -- $setup
 -- >>> :{
