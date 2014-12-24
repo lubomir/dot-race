@@ -17,6 +17,7 @@ data App = App
     , appLogger            :: Logger
     , appFayCommandHandler :: CommandHandler App
     , appTracks            :: Map Text Track
+    , appGames             :: IORef (Map GameId Game)
     }
 
 instance HasHttpManager App where

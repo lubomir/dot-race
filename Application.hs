@@ -48,6 +48,7 @@ makeFoundation appSettings = do
     let appFayCommandHandler = onCommand
 
     appTracks <- loadTracks (appTracksDir appSettings)
+    appGames <- newIORef mempty
 
     -- Return the foundation
     return App {..}

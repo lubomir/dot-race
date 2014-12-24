@@ -24,6 +24,7 @@ library
                      Handler.Fay
                      Handler.Home
                      Handler.NewGame
+                     DotRace.Game
                      DotRace.Track
 
     if flag(dev) || flag(library-only)
@@ -84,6 +85,7 @@ library
                  , time
                  , fay-dom
                  , system-filepath
+                 , websockets
 
 executable         dot-race
     if flag(library-only)
