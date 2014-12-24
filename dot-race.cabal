@@ -86,6 +86,7 @@ library
                  , fay-dom
                  , system-filepath
                  , websockets
+                 , random
 
 executable         dot-race
     if flag(library-only)

@@ -1,3 +1,3 @@
-<form enctype=#{enctype}>
+<form enctype=#{enctype} method=POST>
     ^{widget}
     <button type="submit" .btn .btn-default>_{MsgCreateGame}

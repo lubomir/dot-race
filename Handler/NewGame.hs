@@ -3,7 +3,7 @@ module Handler.NewGame where
 import Import
 
 import Yesod.Form.Bootstrap3
-import Data.Map (keys)
+import Data.Map (keys, insert)
 
 data NewGame = NewGame { track :: Text
                        , numPlayers :: Int
@@ -30,4 +30,23 @@ getNewGameR = do
         $(widgetFile "new-game")
 
 postNewGameR :: Handler Html
-postNewGameR = error "Not yet implemented: postNewGameR"
+postNewGameR = do
+    ((res, widget), enctype) <- runFormPost newGameForm
+    case res of
+        FormSuccess g -> do
+            mtrack <- lookup (track g) . appTracks <$> getYesod
+            case mtrack of
+                Nothing -> return ()
+                Just track -> do
+                    let game = Game { gameTrack = track
+                                    , gameNumPlayers = numPlayers g
+                                    , gamePlayers = []
+                                    }
+                    games <- appGames <$> getYesod
+                    gameId <- liftIO mkGameId
+                    atomicModifyIORef' games (\m -> (insert gameId game m, ()))
+                    redirect (GameR gameId)
+        _ -> return ()
+    defaultLayout $ do
+            setTitleI MsgNewGame
+            $(widgetFile "new-game")
