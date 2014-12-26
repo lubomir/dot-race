@@ -13,4 +13,7 @@ getGameR gid = do
             let trackData = decodeUtf8 $ toStrict $ encode (gameTrack game)
             defaultLayout $ do
                 setTitleI MsgDotRace
+                addScript (StaticR js_svg_js)
+                addScript (StaticR js_jquery_2_1_3_min_js)
                 $(widgetFile "game-screen")
+                $(fayFile "main")

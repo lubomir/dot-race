@@ -113,7 +113,8 @@ fayFile' staticR moduleName =
         { yfsSeparateRuntime = Just ("static", staticR)
         -- , yfsPostProcess = readProcess "java" ["-jar", "closure-compiler.jar"]
         , yfsExternal = Just ("static", staticR)
-        , yfsPackages = ["fay-dom"]
+        , yfsPackages = ["fay-dom", "fay-jquery", "fay-text"]
+        , yfsTypecheckDevel = True
         }
 
 -- | Raw bytes at compile time of @config/settings.yml@

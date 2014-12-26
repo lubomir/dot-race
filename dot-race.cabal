@@ -89,6 +89,8 @@ library
                  , system-filepath
                  , websockets
                  , random
+                 , fay-jquery
+                 , fay-text
 
 executable         dot-race
     if flag(library-only)

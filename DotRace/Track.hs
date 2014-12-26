@@ -27,10 +27,11 @@ instance FromJSON Track where
         return Track {..}
 
 instance ToJSON Track where
-    toJSON (Track {..}) = object [ ":inner" .= trackInner
-                                 , ":outer" .= trackOuter
-                                 , ":start_line" .= trackStartLine
-                                 , ":start_pos" .= trackStartPos
+    toJSON (Track {..}) = object [ "trackInner" .= trackInner
+                                 , "trackOuter" .= trackOuter
+                                 , "trackStartLine" .= trackStartLine
+                                 , "trackStartPos" .= trackStartPos
+                                 , "instance" .= ("Track" :: Text)
                                  ]
 
 
