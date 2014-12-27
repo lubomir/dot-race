@@ -81,15 +81,11 @@ drawGrid (Track inner outer _ _) scale drawing = do
         svgLine drawing x 0 x h >>= attr "class" "grid" >>= groupAdd grid
     forM_ (takeWhile (< h) $ map (*fromIntegral scale) [1..]) $ \y -> do
         svgLine drawing 0 y w y >>= attr "class" "grid" >>= groupAdd grid
-    putStrLn "1"
     let scaled = (scalePoints scale inner)
     print scaled
-    putStrLn "1.5"
     innerOutline <- svgPolygon drawing scaled
         >>= fill "#fff"
-    putStrLn "2"
     outerOutline <- svgPolygon drawing (scalePoints scale outer)
-    putStrLn "3"
     grid `clipWith` outerOutline
 
 addEvent :: Element -> String -> (Event -> Fay ()) -> Fay ()
@@ -122,11 +118,8 @@ draw _ = do
     let scale = 20
     drawing <- initSVG drawingId
     drawGrid track scale drawing
-    putStrLn "a"
     _ <- svgPolygon drawing (scalePoints scale inner) >>= attr "class" "outline"
-    putStrLn "b"
     _ <- svgPolygon drawing (scalePoints scale outer) >>= attr "class" "outline"
-    putStrLn "c"
     pointer <- svgCircle drawing 5 >>= attr "class" "pointer"
     addEvent drawing "mousemove" $ \event -> do
         (x', y') <- eventLocation event
