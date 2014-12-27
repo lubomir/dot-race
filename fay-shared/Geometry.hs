@@ -1,11 +1,6 @@
 module Geometry where
 
-#ifndef FAY
-import Prelude
-import Data.Aeson
-import Control.Applicative
-import Data.Monoid
-#endif
+import SharedTypes
 
 -- $setup
 -- >>> :{
@@ -28,26 +23,8 @@ almostEqual a b
   | otherwise = let relativeError = abs ((a - b) / if abs b > abs a then b else a)
                 in relativeError <= 0.0001
 
-
-data Point = P { _x :: Double
-               , _y :: Double
-               } deriving (Show)
-
 instance Eq Point where
     (P x1 y1) == (P x2 y2) = almostEqual x1 x2 && almostEqual y1 y2
-
-#ifndef FAY
-instance FromJSON Point where
-    parseJSON (Object o) = P <$> o .: "x" <*> o .: "y"
-    parseJSON arr@(Array _) = uncurry P <$> parseJSON arr
-    parseJSON _ = mempty
-
-instance ToJSON Point where
-    toJSON (P x y) = object [ "instance" .= ("Point" :: Text)
-                            , "_x" .= x
-                            , "_y" .= y
-                            ]
-#endif
 
 
 -- |Compute length of the hypothenuse of a right-angled triangle with sides of
@@ -98,10 +75,6 @@ isAligned p = p == clamp p
 clamp :: Point -> Point
 clamp (P x y) = P (roundI x) (roundI y)
   where roundI = (fromIntegral :: Int -> Double) . round
-
-
-data Line = Line Point Point
-          deriving (Show)
 
 
 -- |Format a line into human readable string
@@ -201,9 +174,6 @@ hasIntersection l1@(Line (P x1 y1) (P x2 y2)) l2@(Line (P x3 y3) (P x4 y4)) =
              p = P (px / det) (py / det)
          in segmentHasPoint l1 p && segmentHasPoint l2 p)
 
-
-type Path = [Point]
-
 -- |Find extremes of a path.
 --
 -- >>> extents path
@@ -213,9 +183,6 @@ extents :: Path -> (Double, Double, Double, Double)
 extents p = (go minimum _x p, go minimum _y p, go maximum _x p, go maximum _y p)
   where
     go f g = f . map g
-
-type Polygon = Path
-
 
 -- |Get a list of line segments for given polygon.
 --

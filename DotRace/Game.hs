@@ -6,7 +6,7 @@ import ClassyPrelude
 import System.Random
 import Text.Printf
 
-import DotRace.Track
+import SharedTypes
 
 type GameId = Text
 

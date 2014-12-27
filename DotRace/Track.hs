@@ -10,30 +10,7 @@ import           Data.Yaml                 (decodeEither')
 import           Filesystem.Path.CurrentOS
 import           System.Directory
 
-import DotRace.Geometry
-
-data Track = Track { trackInner     :: [Point]
-                   , trackOuter     :: [Point]
-                   , trackStartLine :: (Point, Point)
-                   , trackStartPos  :: [Point]
-                   } deriving (Show)
-
-instance FromJSON Track where
-    parseJSON = withObject "Track" $ \o -> do
-        trackInner      <- o .: ":inner"
-        trackOuter      <- o .: ":outer"
-        trackStartLine  <- o .: ":start_line"
-        trackStartPos   <- o .: ":start_pos"
-        return Track {..}
-
-instance ToJSON Track where
-    toJSON (Track {..}) = object [ "trackInner" .= trackInner
-                                 , "trackOuter" .= trackOuter
-                                 , "trackStartLine" .= trackStartLine
-                                 , "trackStartPos" .= trackStartPos
-                                 , "instance" .= ("Track" :: Text)
-                                 ]
-
+import SharedTypes
 
 loadTracks :: FilePath -> IO (Map Text Track)
 loadTracks dir = do

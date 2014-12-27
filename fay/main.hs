@@ -5,13 +5,8 @@ import JQuery hiding (not)
 import Fay.Text (Text)
 import qualified Fay.Text as T
 
+import SharedTypes
 import Geometry
-
-data Track = Track { trackInner     :: [(Double, Double)]
-                   , trackOuter     :: [(Double, Double)]
-                   , trackStartLine :: ((Double, Double), (Double, Double))
-                   , trackStartPos  :: [(Double, Double)]
-                   }
 
 readTrackData :: Fay String
 readTrackData = ffi "$('#track').val()"
@@ -59,8 +54,8 @@ attr = ffi "%3.attr(%1, %2)"
 strokeWidth :: String -> Element -> Fay Element
 strokeWidth = ffi "%2.stroke({width: %1})"
 
-scalePoints :: Double -> [(Double, Double)] -> [(Double, Double)]
-scalePoints s = map (\(x, y) -> (x * s, y * s))
+scalePoints :: Double -> [Point] -> [(Double, Double)]
+scalePoints s = map (\(P x y) -> (x * s, y * s))
 
 selectId :: Text -> Fay JQuery
 selectId = ffi "jQuery('#'+%1)"
@@ -72,7 +67,7 @@ clipWith :: Element -> Element -> Fay ()
 clipWith = ffi "%1.clipWith(%2)"
 
 drawGrid :: Track -> Double -> Element -> Fay ()
-drawGrid (Track inner outer _ _) scale drawing = do
+drawGrid t@(Track inner outer _ _) scale drawing = do
     grid <- svgGroup drawing
     el <- selectId drawingId
     w <- round <$> getInnerWidth el
@@ -82,7 +77,6 @@ drawGrid (Track inner outer _ _) scale drawing = do
     forM_ (takeWhile (< h) $ map (*fromIntegral scale) [1..]) $ \y -> do
         svgLine drawing 0 y w y >>= attr "class" "grid" >>= groupAdd grid
     let scaled = (scalePoints scale inner)
-    print scaled
     innerOutline <- svgPolygon drawing scaled
         >>= fill "#fff"
     outerOutline <- svgPolygon drawing (scalePoints scale outer)
@@ -105,12 +99,9 @@ setX, setY :: Double -> Element -> Fay ()
 setX = ffi "%2.x(%1)"
 setY = ffi "%2.y(%1)"
 
-onTrack :: Track -> Double -> Double -> Bool
-onTrack (Track inner outer) x y =
-    let p = P x y
-        out = map (uncurry P) outer
-        inn = map (uncurry P) inner
-    in (p `isInside` out) && not (p `isInside` inn)
+onTrack :: Track -> Point -> Bool
+onTrack (Track inner outer _ _) p =
+    (p `isInside` outer) && not (p `isInside` inner)
 
 draw :: Event -> Fay ()
 draw _ = do
@@ -125,7 +116,7 @@ draw _ = do
         (x', y') <- eventLocation event
         let x = fromIntegral $ round $ x' / scale
         let y = fromIntegral $ round $ y' / scale
-        if onTrack track x y
+        if onTrack track (P x y)
             then do setX (scale * x - 2.5) pointer
                     setY (scale * y - 2.5) pointer
             else setX (-10) pointer >> setY (-10) pointer
