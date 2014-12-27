@@ -1,5 +1,7 @@
 module Geometry where
 
+import Prelude
+
 import SharedTypes
 
 -- $setup
@@ -250,3 +252,9 @@ intersectsWith :: Line -> Polygon -> Bool
 intersectsWith l pg
   | length pg < 3 = False
   | otherwise = any (hasIntersection l) (getSegments pg)
+
+translate :: Double -> Double -> Path -> Path
+translate x y = map (translatePoint x y)
+
+translatePoint :: Double -> Double -> Point -> Point
+translatePoint x' y' (P x y) = P (x + x') (y + y')

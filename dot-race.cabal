@@ -27,7 +27,7 @@ library
                      Handler.Game
                      DotRace.Game
                      DotRace.Track
-                     DotRace.Geometry
+                     Geometry
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
