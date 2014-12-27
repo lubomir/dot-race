@@ -23,6 +23,9 @@ addWindowEvent = ffi "window.addEventListener(%1, %2)"
 initSVG :: Text -> Fay Element
 initSVG = ffi "SVG(%1)"
 
+size :: Double -> Double -> Element -> Fay Element
+size = ffi "%3.size(%1, %2)"
+
 svgGroup :: Element -> Fay Element
 svgGroup = ffi "%1.group()"
 
@@ -99,6 +102,9 @@ setX, setY :: Double -> Element -> Fay ()
 setX = ffi "%2.x(%1)"
 setY = ffi "%2.y(%1)"
 
+setXY :: Double -> Double -> Element -> Fay ()
+setXY x y el = setX x el >> setY y el
+
 onTrack :: Track -> Point -> Bool
 onTrack (Track inner outer _ _) p =
     (p `isInside` outer) && not (p `isInside` inner)
@@ -106,20 +112,21 @@ onTrack (Track inner outer _ _) p =
 draw :: Event -> Fay ()
 draw _ = do
     track@(Track inner outer _ _) <- readTrackData >>= parseTrackData
+    let (_, _, xmax, ymax) = extents outer
     let scale = 20
     drawing <- initSVG drawingId
+    size (scale * (xmax + 0.5)) (scale * (ymax + 0.5)) drawing
     drawGrid track scale drawing
     _ <- svgPolygon drawing (scalePoints scale inner) >>= attr "class" "outline"
     _ <- svgPolygon drawing (scalePoints scale outer) >>= attr "class" "outline"
-    pointer <- svgCircle drawing 5 >>= attr "class" "pointer"
+    pointer <- svgCircle drawing 5 >>= attr "class" "pointer" >>= setXY (-10) (-10)
     addEvent drawing "mousemove" $ \event -> do
         (x', y') <- eventLocation event
         let x = fromIntegral $ round $ x' / scale
         let y = fromIntegral $ round $ y' / scale
         if onTrack track (P x y)
-            then do setX (scale * x - 2.5) pointer
-                    setY (scale * y - 2.5) pointer
-            else setX (-10) pointer >> setY (-10) pointer
+            then do setXY (scale * x - 2.5) (scale * y - 2.5) pointer
+            else setXY (-10) (-10) pointer
 
 main :: Fay ()
 main = do
