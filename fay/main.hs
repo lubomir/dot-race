@@ -75,12 +75,11 @@ drawGrid t@(Track inner outer _ _) scale drawing = do
     el <- selectId drawingId
     w <- round <$> getInnerWidth el
     h <- round <$> getInnerHeight el
-    forM_ (takeWhile (< w) $ map (*fromIntegral scale) [1..]) $ \x -> do
+    forM_ (takeWhile (< w) $ map (*fromIntegral scale) [1..]) $ \x ->
         svgLine drawing x 0 x h >>= attr "class" "grid" >>= groupAdd grid
-    forM_ (takeWhile (< h) $ map (*fromIntegral scale) [1..]) $ \y -> do
+    forM_ (takeWhile (< h) $ map (*fromIntegral scale) [1..]) $ \y ->
         svgLine drawing 0 y w y >>= attr "class" "grid" >>= groupAdd grid
-    let scaled = (scalePoints scale inner)
-    innerOutline <- svgPolygon drawing scaled
+    innerOutline <- svgPolygon drawing (scalePoints scale inner)
         >>= fill "#fff"
     outerOutline <- svgPolygon drawing (scalePoints scale outer)
     grid `clipWith` outerOutline
