@@ -5,6 +5,7 @@ body
     margin: 0
 #drawing
     padding: 0
+    margin: 0
 .outline
     fill: none
     stroke-width: 3

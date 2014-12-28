@@ -88,15 +88,28 @@ drawGrid t@(Track inner outer _ _) scale drawing = do
 addEvent :: Element -> String -> (Event -> Fay ()) -> Fay ()
 addEvent = ffi "%1.on(%2, %3)"
 
-eventClientX, eventClientY :: Event -> Fay Double
-eventClientX = ffi "%1['clientX']"
-eventClientY = ffi "%1['clientY']"
+eventPageX, eventPageY :: Event -> Fay Double
+eventPageX = ffi "%1['clientX']"
+eventPageY = ffi "%1['clientY']"
 
-eventLocation :: Event -> Fay (Double, Double)
-eventLocation ev = do
-    x <- eventClientX ev
-    y <- eventClientY ev
-    return (x, y)
+getBoundingClientRect :: Element -> Fay Element
+getBoundingClientRect = ffi "%1.getBoundingClientRect()"
+
+rectLeft, rectTop :: Element -> Fay Double
+rectLeft = ffi "%1.left"
+rectTop = ffi "%1.top"
+
+getNode :: Element -> Fay Element
+getNode = ffi "%1.node"
+
+eventLocation :: Element -> Event -> Fay (Double, Double)
+eventLocation element ev = do
+    r <- getNode element >>= getBoundingClientRect
+    t <- rectTop r
+    l <- rectLeft r
+    x <- eventPageX ev
+    y <- eventPageY ev
+    return (x - l, y - t)
 
 setX, setY :: Double -> Element -> Fay ()
 setX = ffi "%2.x(%1)"
@@ -119,13 +132,14 @@ draw _ = do
     drawGrid track scale drawing
     _ <- svgPolygon drawing (scalePoints scale inner) >>= attr "class" "outline"
     _ <- svgPolygon drawing (scalePoints scale outer) >>= attr "class" "outline"
-    pointer <- svgCircle drawing 5 >>= attr "class" "pointer" >>= setXY (-10) (-10)
+    pointer <- svgCircle drawing 5 >>= attr "class" "pointer"
+    setXY (-10) (-10) pointer
     addEvent drawing "mousemove" $ \event -> do
-        (x', y') <- eventLocation event
+        (x', y') <- eventLocation drawing event
         let x = fromIntegral $ round $ x' / scale
         let y = fromIntegral $ round $ y' / scale
         if onTrack track (P x y)
-            then do setXY (scale * x - 2.5) (scale * y - 2.5) pointer
+            then setXY (scale * x - 2.5) (scale * y - 2.5) pointer
             else setXY (-10) (-10) pointer
 
 main :: Fay ()
