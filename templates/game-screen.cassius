@@ -10,6 +10,10 @@ body
     fill: none
     stroke-width: 3
     stroke: #000
+    stroke-linejoin: round
+.start_line
+    stroke-width: 5
+    stroke: #999
 .grid
     fill: none
     stroke-width: 1

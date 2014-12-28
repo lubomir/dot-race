@@ -41,7 +41,7 @@ svgPolygon = ffi "%1.polygon(%2)"
 svgCircle :: Element -> Double -> Fay Element
 svgCircle = ffi "%1.circle(%2)"
 
-svgLine :: Element -> Int -> Int -> Int -> Int -> Fay Element
+svgLine :: Element -> Double -> Double -> Double -> Double -> Fay Element
 svgLine = ffi "%1.line(%2, %3, %4, %5)"
 
 fill :: String -> Element -> Fay Element
@@ -73,8 +73,8 @@ drawGrid :: Track -> Double -> Element -> Fay ()
 drawGrid t@(Track inner outer _ _) scale drawing = do
     grid <- svgGroup drawing
     el <- selectId drawingId
-    w <- round <$> getInnerWidth el
-    h <- round <$> getInnerHeight el
+    w <- getInnerWidth el
+    h <- getInnerHeight el
     forM_ (takeWhile (< w) $ map (*fromIntegral scale) [1..]) $ \x ->
         svgLine drawing x 0 x h >>= attr "class" "grid" >>= groupAdd grid
     forM_ (takeWhile (< h) $ map (*fromIntegral scale) [1..]) $ \y ->
@@ -83,6 +83,11 @@ drawGrid t@(Track inner outer _ _) scale drawing = do
         >>= fill "#fff"
     outerOutline <- svgPolygon drawing (scalePoints scale outer)
     grid `clipWith` outerOutline
+
+drawStartLine :: Element -> Double -> (Point, Point) -> Fay Element
+drawStartLine drawing scale (P x1 y1, P x2 y2) =
+    svgLine drawing (scale * x1) (scale * y1) (scale * x2) (scale * y2)
+        >>= attr "class" "start_line"
 
 addEvent :: Element -> String -> (Event -> Fay ()) -> Fay ()
 addEvent = ffi "%1.on(%2, %3)"
@@ -123,12 +128,13 @@ onTrack (Track inner outer _ _) p =
 
 draw :: Event -> Fay ()
 draw _ = do
-    track@(Track inner outer _ _) <- readTrackData >>= parseTrackData
+    track@(Track inner outer startLine _) <- readTrackData >>= parseTrackData
     let (_, _, xmax, ymax) = extents outer
     let scale = 20
     drawing <- initSVG drawingId
     size (scale * (xmax + 0.5)) (scale * (ymax + 0.5)) drawing
     drawGrid track scale drawing
+    drawStartLine drawing scale startLine
     _ <- svgPolygon drawing (scalePoints scale inner) >>= attr "class" "outline"
     _ <- svgPolygon drawing (scalePoints scale outer) >>= attr "class" "outline"
     pointer <- svgCircle drawing 5 >>= attr "class" "pointer"
