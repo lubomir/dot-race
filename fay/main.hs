@@ -1,4 +1,5 @@
 -- {-# LANGUAGE EmptyDataDecls, OverloadedStrings, RebindableSyntax #-}
+{-# LANGUAGE RecordWildCards #-}
 import Prelude
 import FFI
 import JQuery hiding (not)
@@ -29,14 +30,14 @@ size = ffi "%3.size(%1, %2)"
 svgGroup :: Element -> Fay Element
 svgGroup = ffi "%1.group()"
 
-svgRect :: Element -> Fay Element
-svgRect = ffi "%1.rect(100, 100, 100, 100)"
-
 groupAdd :: Element -> Element -> Fay ()
 groupAdd = ffi "%1.add(%2)"
 
-svgPolygon :: Element -> [(Double, Double)] -> Fay Element
-svgPolygon = ffi "%1.polygon(%2)"
+svgPolygon' :: Element -> [(Double, Double)] -> Fay Element
+svgPolygon' = ffi "%1.polygon(%2)"
+
+svgPolygon :: Element -> Double -> [Point] -> Fay Element
+svgPolygon drawing scale = svgPolygon' drawing . scalePoints scale
 
 svgCircle :: Element -> Double -> Fay Element
 svgCircle = ffi "%1.circle(%2)"
@@ -44,15 +45,12 @@ svgCircle = ffi "%1.circle(%2)"
 svgLine :: Element -> Double -> Double -> Double -> Double -> Fay Element
 svgLine = ffi "%1.line(%2, %3, %4, %5)"
 
-fill :: String -> Element -> Fay Element
-fill = ffi "%2.fill(%1)"
-
 svgWidth, svgHeight :: Element -> Fay Int
 svgWidth = ffi "%1.width()"
 svgHeight = ffi "%1.height()"
 
-attr :: String -> String -> Element -> Fay Element
-attr = ffi "%3.attr(%1, %2)"
+setClass :: String -> Element -> Fay Element
+setClass = ffi "%2.attr('class', %1)"
 
 strokeWidth :: String -> Element -> Fay Element
 strokeWidth = ffi "%2.stroke({width: %1})"
@@ -76,18 +74,17 @@ drawGrid t@(Track inner outer _ _) scale drawing = do
     w <- getInnerWidth el
     h <- getInnerHeight el
     forM_ (takeWhile (< w) $ map (*fromIntegral scale) [1..]) $ \x ->
-        svgLine drawing x 0 x h >>= attr "class" "grid" >>= groupAdd grid
+        svgLine drawing x 0 x h >>= setClass "grid" >>= groupAdd grid
     forM_ (takeWhile (< h) $ map (*fromIntegral scale) [1..]) $ \y ->
-        svgLine drawing 0 y w y >>= attr "class" "grid" >>= groupAdd grid
-    innerOutline <- svgPolygon drawing (scalePoints scale inner)
-        >>= fill "#fff"
-    outerOutline <- svgPolygon drawing (scalePoints scale outer)
+        svgLine drawing 0 y w y >>= setClass "grid" >>= groupAdd grid
+    innerOutline <- svgPolygon drawing scale inner >>= setClass "inner_grid_cover"
+    outerOutline <- svgPolygon drawing scale outer
     grid `clipWith` outerOutline
 
 drawStartLine :: Element -> Double -> (Point, Point) -> Fay Element
 drawStartLine drawing scale (P x1 y1, P x2 y2) =
     svgLine drawing (scale * x1) (scale * y1) (scale * x2) (scale * y2)
-        >>= attr "class" "start_line"
+        >>= setClass "start_line"
 
 addEvent :: Element -> String -> (Event -> Fay ()) -> Fay ()
 addEvent = ffi "%1.on(%2, %3)"
@@ -126,18 +123,24 @@ onTrack :: Track -> Point -> Bool
 onTrack (Track inner outer _ _) p =
     (p `isInside` outer) && not (p `isInside` inner)
 
-draw :: Event -> Fay ()
-draw _ = do
+draw :: Track -> Element -> Double -> Fay ()
+draw track@Track{..} drawing scale = do
+    drawGrid track scale drawing
+    drawStartLine drawing scale trackStartLine
+    _ <- svgPolygon drawing scale trackInner >>= setClass "outline"
+    _ <- svgPolygon drawing scale trackOuter >>= setClass "outline"
+    return ()
+
+initGame :: Event -> Fay ()
+initGame _ = do
     track@(Track inner outer startLine _) <- readTrackData >>= parseTrackData
     let (_, _, xmax, ymax) = extents outer
     let scale = 20
     drawing <- initSVG drawingId
     size (scale * (xmax + 0.5)) (scale * (ymax + 0.5)) drawing
-    drawGrid track scale drawing
-    drawStartLine drawing scale startLine
-    _ <- svgPolygon drawing (scalePoints scale inner) >>= attr "class" "outline"
-    _ <- svgPolygon drawing (scalePoints scale outer) >>= attr "class" "outline"
-    pointer <- svgCircle drawing 5 >>= attr "class" "pointer"
+    draw track drawing scale
+
+    pointer <- svgCircle drawing 5 >>= setClass "pointer"
     setXY (-10) (-10) pointer
     addEvent drawing "mousemove" $ \event -> do
         (x', y') <- eventLocation drawing event
@@ -149,4 +152,4 @@ draw _ = do
 
 main :: Fay ()
 main = do
-    addWindowEvent "load" draw
+    addWindowEvent "load" initGame

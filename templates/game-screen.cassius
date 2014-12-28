@@ -18,3 +18,5 @@ body
     fill: none
     stroke-width: 1
     stroke: #ccc
+.inner_grid_cover
+    fill: #fff
