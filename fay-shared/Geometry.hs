@@ -256,8 +256,20 @@ intersectsWith l pg
   | length pg < 3 = False
   | otherwise = any (hasIntersection l) (getSegments pg)
 
+-- |Translate the path by moving every single point.
+--
 translate :: Double -> Double -> Path -> Path
 translate x y = map (translatePoint x y)
 
+-- |Move the point.
+--
+-- >>> translatePoint 1 1 (P 0 0)
+-- P {_x = 1.0, _y = 1.0}
+-- >>> translatePoint (-1) 0 (P 2 2)
+-- P {_x = 1.0, _y = 2.0}
+--
+-- prop> \x y -> translatePoint 0 0 (P x y) == P x y
+-- prop> \dx dy x y -> translatePoint 0 dy (translatePoint dx 0 (P x y)) == translatePoint dx dy (P x y)
+--
 translatePoint :: Double -> Double -> Point -> Point
 translatePoint x' y' (P x y) = P (x + x') (y + y')

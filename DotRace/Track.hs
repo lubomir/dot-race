@@ -37,12 +37,12 @@ normalizeTrack :: Track -> Track
 normalizeTrack Track{..} =
     let (xmin, ymin, _, _) = extents trackOuter
         (start, end) = trackStartLine
-        x' = 0.5 - xmin
-        y' = 0.5 - ymin
-        shift = translate (-x') (-y')
-        shiftP = translatePoint (-x') (-y')
+        x' = max (0.5 - xmin) 0
+        y' = max (0.5 - ymin) 0
+        shift = translate x' y'
+        shiftP = clamp . translatePoint x' y'
    in Track { trackInner = shift trackInner
             , trackOuter = shift trackOuter
             , trackStartLine = (shiftP start, shiftP end)
-            , trackStartPos = shift trackStartPos
+            , trackStartPos = map clamp $ shift trackStartPos
             }
