@@ -50,24 +50,14 @@ svgLine :: Element -> Double -> Double -> Double -> Double -> Double -> Fay Elem
 svgLine drawing scale x1 y1 x2 y2 = svgLine' drawing (scale * x1) (scale * y1)
                                                      (scale * x2) (scale * y2)
 
-svgWidth, svgHeight :: Element -> Fay Int
-svgWidth = ffi "%1.width()"
-svgHeight = ffi "%1.height()"
-
 setClass :: String -> Element -> Fay Element
 setClass = ffi "%2.attr('class', %1)"
-
-strokeWidth :: String -> Element -> Fay Element
-strokeWidth = ffi "%2.stroke({width: %1})"
 
 scalePoints :: Double -> [Point] -> [(Double, Double)]
 scalePoints s = map (\(P x y) -> (x * s, y * s))
 
-selectId :: Text -> Fay Element
+selectId :: String -> Fay Element
 selectId = ffi "document.getElementById(%1)"
-
-(<$>) :: (a -> b) -> Fay a -> Fay b
-f <$> x = x >>= return . f
 
 clipWith :: Element -> Element -> Fay ()
 clipWith = ffi "%1.clipWith(%2)"
@@ -106,12 +96,9 @@ rectLeft, rectTop :: Element -> Fay Double
 rectLeft = ffi "%1.left"
 rectTop = ffi "%1.top"
 
-getNode :: Element -> Fay Element
-getNode = ffi "%1.node"
-
 eventLocation :: Element -> Event -> Fay (Double, Double)
 eventLocation element ev = do
-    r <- getNode element >>= getBoundingClientRect
+    r <- getBoundingClientRect element
     t <- rectTop r
     l <- rectLeft r
     x <- eventPageX ev
@@ -147,10 +134,11 @@ initGame _ = do
     size (scale * (xmax + 0.5)) (scale * (ymax + 0.5)) drawing
     draw track drawing scale
 
+    canvas <- selectId "drawing"
     pointer <- svgCircle drawing 5 >>= setClass "pointer"
     setXY (-10) (-10) pointer
-    addEvent drawing "mousemove" $ \event -> do
-        (x', y') <- eventLocation drawing event
+    addEvent canvas "mousemove" $ \event -> do
+        (x', y') <- eventLocation canvas event
         z <- get zoom
         let x = fromIntegral $ round $ x' / (scale * z)
         let y = fromIntegral $ round $ y' / (scale * z)
@@ -158,10 +146,10 @@ initGame _ = do
             then setXY (scale * x - 2.5) (scale * y - 2.5) pointer
             else setXY (-10) (-10) pointer
 
-    zoomInBtn <- selectId (T.pack "zoom-in")
+    zoomInBtn <- selectId "zoom-in"
     addEvent zoomInBtn "click" $ \_ -> modify zoom zoomIn
 
-    zoomOutBtn <- selectId (T.pack "zoom-out")
+    zoomOutBtn <- selectId "zoom-out"
     addEvent zoomOutBtn "click" $ \_ -> modify zoom zoomOut
 
     _ <- subscribe zoom $ \z -> do
