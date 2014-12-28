@@ -42,8 +42,12 @@ svgPolygon drawing scale = svgPolygon' drawing . scalePoints scale
 svgCircle :: Element -> Double -> Fay Element
 svgCircle = ffi "%1.circle(%2)"
 
-svgLine :: Element -> Double -> Double -> Double -> Double -> Fay Element
-svgLine = ffi "%1.line(%2, %3, %4, %5)"
+svgLine' :: Element -> Double -> Double -> Double -> Double -> Fay Element
+svgLine' = ffi "%1.line(%2, %3, %4, %5)"
+
+svgLine :: Element -> Double -> Double -> Double -> Double -> Double -> Fay Element
+svgLine drawing scale x1 y1 x2 y2 = svgLine' drawing (scale * x1) (scale * y1)
+                                                     (scale * x2) (scale * y2)
 
 svgWidth, svgHeight :: Element -> Fay Int
 svgWidth = ffi "%1.width()"
@@ -71,20 +75,22 @@ drawGrid :: Track -> Double -> Element -> Fay ()
 drawGrid t@(Track inner outer _ _) scale drawing = do
     grid <- svgGroup drawing
     el <- selectId drawingId
-    w <- getInnerWidth el
-    h <- getInnerHeight el
-    forM_ (takeWhile (< w) $ map (*fromIntegral scale) [1..]) $ \x ->
-        svgLine drawing x 0 x h >>= setClass "grid" >>= groupAdd grid
-    forM_ (takeWhile (< h) $ map (*fromIntegral scale) [1..]) $ \y ->
-        svgLine drawing 0 y w y >>= setClass "grid" >>= groupAdd grid
+    let (_, _, w', h') = extents outer
+        w = round $ w' + 1
+        h = round $ h' + 1
+    forM_ [0..w+1] $ \x' ->
+        let x = fromIntegral x'
+        in svgLine drawing scale x 0 x h' >>= setClass "grid" >>= groupAdd grid
+    forM_ [0..h+1] $ \y' ->
+        let y = fromIntegral y'
+        in svgLine drawing scale 0 y w' y >>= setClass "grid" >>= groupAdd grid
     innerOutline <- svgPolygon drawing scale inner >>= setClass "inner_grid_cover"
     outerOutline <- svgPolygon drawing scale outer
     grid `clipWith` outerOutline
 
 drawStartLine :: Element -> Double -> (Point, Point) -> Fay Element
 drawStartLine drawing scale (P x1 y1, P x2 y2) =
-    svgLine drawing (scale * x1) (scale * y1) (scale * x2) (scale * y2)
-        >>= setClass "start_line"
+    svgLine drawing scale x1 y1 x2 y2 >>= setClass "start_line"
 
 addEvent :: Element -> String -> (Event -> Fay ()) -> Fay ()
 addEvent = ffi "%1.on(%2, %3)"
