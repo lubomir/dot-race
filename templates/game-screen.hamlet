@@ -1,2 +1,15 @@
 <input type="hidden" id="track" value="#{trackData}">
-<div id="drawing">
+
+<div .navbar .navbar-fixed-top .navbar-inverse>
+    <div .container-fluid>
+        <div .navbar-header>
+            <a .navbar-brand>Dot Race
+
+<div .container-fluid>
+    <div .row>
+        <div .col-md-10>
+            <div #drawing>
+        <div .col-md-2 .sidebar>
+            <div #chat>
+                <div>
+                <textarea>
