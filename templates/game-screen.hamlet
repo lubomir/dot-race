@@ -7,7 +7,7 @@
 
 <div .container-fluid>
     <div .row>
-        <div .col-md-10>
+        <div .col-md-10 .main>
             <div #drawing>
         <div .col-md-2 .sidebar>
             <div #chat>
