@@ -5,6 +5,7 @@ import FFI
 import JQuery hiding (not)
 import Fay.Text (Text)
 import qualified Fay.Text as T
+import Data.Var
 
 import SharedTypes
 import Geometry
@@ -62,8 +63,8 @@ strokeWidth = ffi "%2.stroke({width: %1})"
 scalePoints :: Double -> [Point] -> [(Double, Double)]
 scalePoints s = map (\(P x y) -> (x * s, y * s))
 
-selectId :: Text -> Fay JQuery
-selectId = ffi "jQuery('#'+%1)"
+selectId :: Text -> Fay Element
+selectId = ffi "document.getElementById(%1)"
 
 (<$>) :: (a -> b) -> Fay a -> Fay b
 f <$> x = x >>= return . f
@@ -74,7 +75,6 @@ clipWith = ffi "%1.clipWith(%2)"
 drawGrid :: Track -> Double -> Element -> Fay ()
 drawGrid t@(Track inner outer _ _) scale drawing = do
     grid <- svgGroup drawing
-    el <- selectId drawingId
     let (_, _, w', h') = extents outer
         w = round $ w' + 1
         h = round $ h' + 1
@@ -93,7 +93,7 @@ drawStartLine drawing scale (P x1 y1, P x2 y2) =
     svgLine drawing scale x1 y1 x2 y2 >>= setClass "start_line"
 
 addEvent :: Element -> String -> (Event -> Fay ()) -> Fay ()
-addEvent = ffi "%1.on(%2, %3)"
+addEvent = ffi "$(%1).on(%2, %3)"
 
 eventPageX, eventPageY :: Event -> Fay Double
 eventPageX = ffi "%1['clientX']"
@@ -142,6 +142,7 @@ initGame _ = do
     track@(Track inner outer startLine _) <- readTrackData >>= parseTrackData
     let (_, _, xmax, ymax) = extents outer
     let scale = 20
+    zoom <- newVar 1
     drawing <- initSVG drawingId
     size (scale * (xmax + 0.5)) (scale * (ymax + 0.5)) drawing
     draw track drawing scale
@@ -150,11 +151,32 @@ initGame _ = do
     setXY (-10) (-10) pointer
     addEvent drawing "mousemove" $ \event -> do
         (x', y') <- eventLocation drawing event
-        let x = fromIntegral $ round $ x' / scale
-        let y = fromIntegral $ round $ y' / scale
+        z <- get zoom
+        let x = fromIntegral $ round $ x' / (scale * z)
+        let y = fromIntegral $ round $ y' / (scale * z)
         if onTrack track (P x y)
             then setXY (scale * x - 2.5) (scale * y - 2.5) pointer
             else setXY (-10) (-10) pointer
+
+    zoomInBtn <- selectId (T.pack "zoom-in")
+    addEvent zoomInBtn "click" $ \_ -> modify zoom zoomIn
+
+    zoomOutBtn <- selectId (T.pack "zoom-out")
+    addEvent zoomOutBtn "click" $ \_ -> modify zoom zoomOut
+
+    _ <- subscribe zoom $ \z -> do
+        svgScale z z drawing
+        size (z * scale * (xmax + 0.5)) (z * scale * (ymax + 0.5)) drawing
+    return ()
+
+zoomIn :: Double -> Double
+zoomIn now = if now < 2 then now + 0.25 else now
+
+zoomOut :: Double -> Double
+zoomOut now = if now > 0.5 then now - 0.25 else now
+
+svgScale :: Double -> Double -> Element -> Fay ()
+svgScale = ffi "%3.scale(%1, %2)"
 
 main :: Fay ()
 main = do

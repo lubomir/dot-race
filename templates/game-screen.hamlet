@@ -4,6 +4,17 @@
     <div .container-fluid>
         <div .navbar-header>
             <a .navbar-brand>Dot Race
+        <div>
+            <ul .nav .navbar-nav .navbar-right>
+                <li>
+                    <div .btn-group>
+                        <button type=button .navbar-btn .btn .btn-default #zoom-in>
+                            <span .glyphicon .glyphicon-zoom-in>
+                        <button type=button .navbar-btn .btn .btn-default #zoom-out>
+                            <span .glyphicon .glyphicon-zoom-out>
+                <li>
+                    <a href="#">
+                        Help
 
 <div .container-fluid>
     <div .row>
