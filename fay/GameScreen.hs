@@ -1,5 +1,7 @@
 -- {-# LANGUAGE EmptyDataDecls, OverloadedStrings, RebindableSyntax #-}
 {-# LANGUAGE RecordWildCards #-}
+module GameScreen where
+
 import Prelude
 import FFI
 import JQuery hiding (not)
