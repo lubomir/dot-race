@@ -45,11 +45,8 @@ svgPolygon drawing = svgPolygon' drawing . map (\(P x y) -> (x, y))
 svgCircle :: Element -> Double -> Fay Element
 svgCircle = ffi "%1.circle(%2)"
 
-svgLine' :: Element -> Double -> Double -> Double -> Double -> Fay Element
-svgLine' = ffi "%1.line(%2, %3, %4, %5)"
-
 svgLine :: Element -> Double -> Double -> Double -> Double -> Fay Element
-svgLine drawing x1 y1 x2 y2 = svgLine' drawing x1 y1 x2 y2
+svgLine = ffi "%1.line(%2, %3, %4, %5)"
 
 setClass :: String -> Element -> Fay Element
 setClass = ffi "%2.attr('class', %1)"
