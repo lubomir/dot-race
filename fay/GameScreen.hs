@@ -196,7 +196,7 @@ initialZoom :: Double
 initialZoom = 20
 
 minZoom :: Double
-minZoom = 10
+minZoom = 5
 
 maxZoom :: Double
 maxZoom = 40
