@@ -151,6 +151,9 @@ getPosition z scale element event = do
 pointerRadius :: Double
 pointerRadius = 6
 
+svgMoveFront :: Element -> Fay Element
+svgMoveFront = ffi "%1.front()"
+
 initGame :: Event -> Fay ()
 initGame _ = do
     track@(Track inner outer startLine startPos) <- readTrackData >>= parseTrackData
@@ -169,6 +172,7 @@ initGame _ = do
     addEvent canvas "mousemove" $ \event -> do
         z <- get zoom
         (x, y) <- getPosition z scale canvas event
+        svgMoveFront pointer
         if onTrack track (P x y)
             then setXY (scale * x - pointerRadius / 2) (scale * y - pointerRadius / 2) pointer
             else setXY (-10) (-10) pointer
