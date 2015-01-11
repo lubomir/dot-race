@@ -12,6 +12,7 @@ import Data.Var
 import SharedTypes
 import Geometry
 import Constants
+import FFI.SVG
 
 readTrackData :: Fay String
 readTrackData = ffi "$('#track').val()"
@@ -25,38 +26,8 @@ drawingId = T.pack "drawing"
 addWindowEvent :: String -> (Event -> Fay ()) -> Fay ()
 addWindowEvent = ffi "window.addEventListener(%1, %2)"
 
-initSVG :: Text -> Fay Element
-initSVG = ffi "SVG(%1)"
-
-size :: Double -> Double -> Element -> Fay Element
-size = ffi "%3.size(%1, %2)"
-
-svgGroup :: Element -> Fay Element
-svgGroup = ffi "%1.group()"
-
-groupAdd :: Element -> Element -> Fay ()
-groupAdd = ffi "%1.add(%2)"
-
-svgPolygon' :: Element -> [(Double, Double)] -> Fay Element
-svgPolygon' = ffi "%1.polygon(%2)"
-
-svgPolygon :: Element -> [Point] -> Fay Element
-svgPolygon drawing = svgPolygon' drawing . map (\(P x y) -> (x, y))
-
-svgCircle :: Element -> Double -> Fay Element
-svgCircle = ffi "%1.circle(%2)"
-
-svgLine :: Element -> Double -> Double -> Double -> Double -> Fay Element
-svgLine = ffi "%1.line(%2, %3, %4, %5)"
-
-setClass :: String -> Element -> Fay Element
-setClass = ffi "%2.attr('class', %1)"
-
 selectId :: String -> Fay Element
 selectId = ffi "document.getElementById(%1)"
-
-clipWith :: Element -> Element -> Fay ()
-clipWith = ffi "%1.clipWith(%2)"
 
 drawGrid :: Track -> Element -> Fay ()
 drawGrid t@(Track inner outer _ _) drawing = do
@@ -101,10 +72,6 @@ eventLocation element ev = do
     y <- eventPageY ev
     return (x - l, y - t)
 
-setX, setY :: Double -> Element -> Fay ()
-setX = ffi "%2.x(%1)"
-setY = ffi "%2.y(%1)"
-
 setXY :: Double -> Double -> Element -> Fay ()
 setXY x y el = setX x el >> setY y el
 
@@ -138,9 +105,6 @@ getPosition z element event = do
     return (toNaturalCoord x, toNaturalCoord y)
   where toNaturalCoord = fromIntegral . round . (/ z)
 
-svgMoveFront :: Element -> Fay Element
-svgMoveFront = ffi "%1.front()"
-
 initGame :: Event -> Fay ()
 initGame _ = do
     track@(Track inner outer startLine startPos) <- readTrackData >>= parseTrackData
@@ -153,7 +117,7 @@ initGame _ = do
     setXY (-10) (-10) pointer
 
     get zoom >>= \z -> do
-        size (z * (xmax + 0.5)) (z * (ymax + 0.5)) drawing
+        svgSize (z * (xmax + 0.5)) (z * (ymax + 0.5)) drawing
         draw track drawing
         get playerTrace >>= drawMove drawing
         svgScale z z drawing
@@ -181,7 +145,7 @@ initGame _ = do
 
     _ <- subscribe zoom $ \z -> do
         svgScale z z drawing
-        size (z * (xmax + 0.5)) (z * (ymax + 0.5)) drawing
+        svgSize (z * (xmax + 0.5)) (z * (ymax + 0.5)) drawing
     return ()
 
 zoomIn :: Double -> Double
@@ -189,9 +153,6 @@ zoomIn now = if now < maxZoom then now + zoomIncrement else now
 
 zoomOut :: Double -> Double
 zoomOut now = if now > minZoom then now - zoomIncrement else now
-
-svgScale :: Double -> Double -> Element -> Fay ()
-svgScale = ffi "%3.scale(%1, %2)"
 
 main :: Fay ()
 main = do
