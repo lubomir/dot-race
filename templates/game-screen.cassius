@@ -32,22 +32,22 @@ body
 
 .outline
     fill: none
-    stroke-width: 3
+    stroke-width: 0.15
     stroke: #000
     stroke-linejoin: round
 .start_line
-    stroke-width: 5
+    stroke-width: 0.25
     stroke: #999
 .grid
     fill: none
-    stroke-width: 1
+    stroke-width: 0.05
     stroke: #ccc
 .inner_grid_cover
     fill: #fff
 
 .trace
     fill: none
-    stroke-width: 2
+    stroke-width: 0.1
     stroke: #f00
 
 .tick
