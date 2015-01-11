@@ -44,3 +44,11 @@ body
     stroke: #ccc
 .inner_grid_cover
     fill: #fff
+
+.trace
+    fill: none
+    stroke-width: 2
+    stroke: #f00
+
+.tick
+    fill: #f00

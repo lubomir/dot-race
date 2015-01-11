@@ -126,12 +126,26 @@ draw track@Track{..} drawing scale = do
     _ <- svgPolygon drawing scale trackOuter >>= setClass "outline"
     return ()
 
+drawMove :: Element -> Double -> [Point] -> Fay ()
+drawMove drawing scale pts = do
+    svgLine drawing scale x1 y1 x2 y2 >>= setClass "trace"
+    svgCircle drawing 8
+        >>= setClass "tick"
+        >>= setXY (x2 * scale - 4) (y2 * scale - 4)
+    return ()
+  where
+    (x1, y1, x2, y2) = case pts of
+        [P x y]             -> (x, y, x, y)
+        (P x1 y1:P x2 y2:_) -> (x2, y2, x1, y1)
+
+
 initGame :: Event -> Fay ()
 initGame _ = do
     track@(Track inner outer startLine _) <- readTrackData >>= parseTrackData
     let (_, _, xmax, ymax) = extents outer
     let scale = 20
     zoom <- newVar 1
+    playerTrace <- newVar []
     drawing <- initSVG drawingId
     size (scale * (xmax + 0.5)) (scale * (ymax + 0.5)) drawing
     draw track drawing scale
@@ -147,6 +161,15 @@ initGame _ = do
         if onTrack track (P x y)
             then setXY (scale * x - 2.5) (scale * y - 2.5) pointer
             else setXY (-10) (-10) pointer
+
+    addEvent canvas "click" $ \event -> do
+        (x', y') <- eventLocation canvas event
+        z <- get zoom
+        let x = fromIntegral $ round $ x' / (scale * z)
+        let y = fromIntegral $ round $ y' / (scale * z)
+        modify playerTrace (P x y:)
+        get playerTrace >>= drawMove drawing (scale * z)
+        return ()
 
     zoomInBtn <- selectId "zoom-in"
     addEvent zoomInBtn "click" $ \_ -> modify zoom zoomIn
