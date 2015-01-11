@@ -11,6 +11,7 @@ import Data.Var
 
 import SharedTypes
 import Geometry
+import Constants
 
 readTrackData :: Fay String
 readTrackData = ffi "$('#track').val()"
@@ -119,9 +120,6 @@ draw track@Track{..} drawing = do
     _ <- svgPolygon drawing trackOuter >>= setClass "outline"
     return ()
 
-tickRadius :: Double
-tickRadius = 0.4
-
 drawMove :: Element -> [Point] -> Fay ()
 drawMove drawing pts = do
     svgLine drawing x1 y1 x2 y2 >>= setClass "trace"
@@ -139,9 +137,6 @@ getPosition z element event = do
     (x, y) <- eventLocation element event
     return (toNaturalCoord x, toNaturalCoord y)
   where toNaturalCoord = fromIntegral . round . (/ z)
-
-pointerRadius :: Double
-pointerRadius = 0.3
 
 svgMoveFront :: Element -> Fay Element
 svgMoveFront = ffi "%1.front()"
@@ -188,18 +183,6 @@ initGame _ = do
         svgScale z z drawing
         size (z * (xmax + 0.5)) (z * (ymax + 0.5)) drawing
     return ()
-
-zoomIncrement :: Double
-zoomIncrement = 5
-
-initialZoom :: Double
-initialZoom = 20
-
-minZoom :: Double
-minZoom = 5
-
-maxZoom :: Double
-maxZoom = 40
 
 zoomIn :: Double -> Double
 zoomIn now = if now < maxZoom then now + zoomIncrement else now
