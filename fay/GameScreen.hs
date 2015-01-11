@@ -141,14 +141,15 @@ drawMove drawing scale pts = do
 
 initGame :: Event -> Fay ()
 initGame _ = do
-    track@(Track inner outer startLine _) <- readTrackData >>= parseTrackData
+    track@(Track inner outer startLine startPos) <- readTrackData >>= parseTrackData
     let (_, _, xmax, ymax) = extents outer
     let scale = 20
     zoom <- newVar 1
-    playerTrace <- newVar []
+    playerTrace <- newVar [startPos !! 1]
     drawing <- initSVG drawingId
     size (scale * (xmax + 0.5)) (scale * (ymax + 0.5)) drawing
     draw track drawing scale
+    get playerTrace >>= drawMove drawing scale
 
     canvas <- selectId "drawing"
     pointer <- svgCircle drawing 5 >>= setClass "pointer"
