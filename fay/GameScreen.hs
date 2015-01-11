@@ -126,12 +126,15 @@ draw track@Track{..} drawing scale = do
     _ <- svgPolygon drawing scale trackOuter >>= setClass "outline"
     return ()
 
+tickRadius :: Double
+tickRadius = 8
+
 drawMove :: Element -> Double -> [Point] -> Fay ()
 drawMove drawing scale pts = do
     svgLine drawing scale x1 y1 x2 y2 >>= setClass "trace"
-    svgCircle drawing 8
+    svgCircle drawing tickRadius
         >>= setClass "tick"
-        >>= setXY (x2 * scale - 4) (y2 * scale - 4)
+        >>= setXY (x2 * scale - tickRadius / 2) (y2 * scale - tickRadius / 2)
     return ()
   where
     (x1, y1, x2, y2) = case pts of
@@ -145,6 +148,8 @@ getPosition z scale element event = do
     let y = fromIntegral $ round $ y' / (scale * z)
     return (x, y)
 
+pointerRadius :: Double
+pointerRadius = 6
 
 initGame :: Event -> Fay ()
 initGame _ = do
@@ -159,13 +164,13 @@ initGame _ = do
     get playerTrace >>= drawMove drawing scale
 
     canvas <- selectId "drawing"
-    pointer <- svgCircle drawing 5 >>= setClass "pointer"
+    pointer <- svgCircle drawing pointerRadius >>= setClass "pointer"
     setXY (-10) (-10) pointer
     addEvent canvas "mousemove" $ \event -> do
         z <- get zoom
         (x, y) <- getPosition z scale canvas event
         if onTrack track (P x y)
-            then setXY (scale * x - 2.5) (scale * y - 2.5) pointer
+            then setXY (scale * x - pointerRadius / 2) (scale * y - pointerRadius / 2) pointer
             else setXY (-10) (-10) pointer
 
     addEvent canvas "click" $ \event -> do
@@ -186,11 +191,20 @@ initGame _ = do
         size (z * scale * (xmax + 0.5)) (z * scale * (ymax + 0.5)) drawing
     return ()
 
+zoomIncrement :: Double
+zoomIncrement = 0.25
+
+minZoom :: Double
+minZoom = 0.5
+
+maxZoom :: Double
+maxZoom = 2
+
 zoomIn :: Double -> Double
-zoomIn now = if now < 2 then now + 0.25 else now
+zoomIn now = if now < maxZoom then now + zoomIncrement else now
 
 zoomOut :: Double -> Double
-zoomOut now = if now > 0.5 then now - 0.25 else now
+zoomOut now = if now > minZoom then now - zoomIncrement else now
 
 svgScale :: Double -> Double -> Element -> Fay ()
 svgScale = ffi "%3.scale(%1, %2)"
