@@ -5,8 +5,8 @@ module GameScreen where
 import Prelude
 import FFI
 import JQuery hiding (not)
-import Fay.Text (Text)
-import qualified Fay.Text as T
+import Data.Text (Text)
+import qualified Data.Text as T
 import Data.Var
 
 import SharedTypes
