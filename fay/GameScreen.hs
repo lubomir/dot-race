@@ -136,10 +136,9 @@ drawMove drawing pts = do
 
 getPosition :: Double -> Element -> Event -> Fay (Double, Double)
 getPosition z element event = do
-    (x', y') <- eventLocation element event
-    let x = fromIntegral $ round $ x' / z
-    let y = fromIntegral $ round $ y' / z
-    return (x, y)
+    (x, y) <- eventLocation element event
+    return (toNaturalCoord x, toNaturalCoord y)
+  where toNaturalCoord = fromIntegral . round . (/ z)
 
 pointerRadius :: Double
 pointerRadius = 0.3
