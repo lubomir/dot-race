@@ -138,6 +138,13 @@ drawMove drawing scale pts = do
         [P x y]             -> (x, y, x, y)
         (P x1 y1:P x2 y2:_) -> (x2, y2, x1, y1)
 
+getPosition :: Double -> Double -> Element -> Event -> Fay (Double, Double)
+getPosition z scale element event = do
+    (x', y') <- eventLocation element event
+    let x = fromIntegral $ round $ x' / (scale * z)
+    let y = fromIntegral $ round $ y' / (scale * z)
+    return (x, y)
+
 
 initGame :: Event -> Fay ()
 initGame _ = do
@@ -155,19 +162,15 @@ initGame _ = do
     pointer <- svgCircle drawing 5 >>= setClass "pointer"
     setXY (-10) (-10) pointer
     addEvent canvas "mousemove" $ \event -> do
-        (x', y') <- eventLocation canvas event
         z <- get zoom
-        let x = fromIntegral $ round $ x' / (scale * z)
-        let y = fromIntegral $ round $ y' / (scale * z)
+        (x, y) <- getPosition z scale canvas event
         if onTrack track (P x y)
             then setXY (scale * x - 2.5) (scale * y - 2.5) pointer
             else setXY (-10) (-10) pointer
 
     addEvent canvas "click" $ \event -> do
-        (x', y') <- eventLocation canvas event
         z <- get zoom
-        let x = fromIntegral $ round $ x' / (scale * z)
-        let y = fromIntegral $ round $ y' / (scale * z)
+        (x, y) <- getPosition z scale canvas event
         modify playerTrace (P x y:)
         get playerTrace >>= drawMove drawing (scale * z)
         return ()
