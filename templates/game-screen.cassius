@@ -55,3 +55,12 @@ body
 
 .pointer
     fill: rgba(0, 255, 0, 0.8)
+
+.option
+    fill: #7F7F7F
+
+.crashPoint
+    fill: #FCE80F
+    stroke-width: 0.1
+    stroke: #f00
+    stroke-linejoin: round

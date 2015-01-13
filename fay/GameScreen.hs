@@ -4,7 +4,7 @@ module GameScreen where
 
 import Prelude
 import FFI
-import JQuery hiding (not)
+import JQuery hiding (not, filter)
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Var
@@ -28,6 +28,9 @@ addWindowEvent = ffi "window.addEventListener(%1, %2)"
 
 selectId :: String -> Fay Element
 selectId = ffi "document.getElementById(%1)"
+
+selectClass :: String -> Fay [Element]
+selectClass = ffi "document.getElementsByClassName(%1)"
 
 drawGrid :: Track -> Element -> Fay ()
 drawGrid t@(Track inner outer _ _) drawing = do
@@ -105,6 +108,72 @@ getPosition z element event = do
     return (toNaturalCoord x, toNaturalCoord y)
   where toNaturalCoord = fromIntegral . round . (/ z)
 
+getNextPoint :: [Point] -> Point
+getNextPoint [p] = p
+getNextPoint (P x2 y2: P x1 y1:_) = P (2 * x2 - x1) (2 * y2 - y1)
+
+getNeighbors :: Point -> [Point]
+getNeighbors (P x y) = [ P (x + xd) (y + yd)
+                       | xd <- [-1, 0, 1]
+                       , yd <- [-1, 0, 1]
+                       ]
+
+isOnTrack :: Point -> Track -> Bool
+isOnTrack p t = (p `isInside` trackOuter t) && not (p `isInside` trackInner t)
+
+drawCrash :: Element -> Point -> Fay Element
+drawCrash drawing (P x y) = svgPolygon drawing pts >>= setClass "crashPoint"
+  where
+    s = 0.5
+    q1 = s * 0.2
+    q2 = s * 0.4
+    q3 = s * 0.7
+    pts = [ P (x + q1) (y - q2)
+          , P (x + q3) (y - q3)
+          , P (x + q2) (y - q1)
+          , P (x + s ) (y     )
+
+          , P (x + q2) (y + q1)
+          , P (x + q3) (y + q3)
+          , P (x + q1) (y + q2)
+          , P (x     ) (y + s )
+
+          , P (x - q1) (y + q2)
+          , P (x - q3) (y + q3)
+          , P (x - q2) (y + q1)
+          , P (x - s ) (y     )
+
+          , P (x - q2) (y - q1)
+          , P (x - q3) (y - q3)
+          , P (x - q1) (y - q2)
+          , P (x     ) (y - s )
+          ]
+
+
+drawOpt :: Element -> Point -> Fay Element
+drawOpt drawing (P x y) = do
+    opt <- svgCircle drawing optionRadius >>= setClass "option"
+    setXY (x - offset) (y - offset) opt
+    return opt
+  where
+    offset = optionRadius / 2
+
+-- |Compute and redraw options. Returns the list of options or empty list on
+-- crash.
+--
+refreshOptions :: Element -> Track -> [Point] -> Fay [Point]
+refreshOptions drawing track trace@(tp:_) = do
+    opts <- selectClass "option"
+    mapM_ svgRemove opts
+    let opts' = filter isValid $ getNeighbors $ getNextPoint trace
+    case opts' of
+        [] -> drawCrash drawing tp >> return ()
+        opts -> mapM_ (drawOpt drawing) opts
+    return opts'
+  where
+    isValid :: Point -> Bool
+    isValid p = (p /= tp) && (p `isOnTrack` track)
+
 initGame :: Event -> Fay ()
 initGame _ = do
     track@(Track inner outer startLine startPos) <- readTrackData >>= parseTrackData
@@ -134,7 +203,9 @@ initGame _ = do
         z <- get zoom
         (x, y) <- getPosition z canvas event
         modify playerTrace (P x y:)
-        get playerTrace >>= drawMove drawing
+        trace <- get playerTrace
+        drawMove drawing trace
+        refreshOptions drawing track trace
         return ()
 
     zoomInBtn <- selectId "zoom-in"

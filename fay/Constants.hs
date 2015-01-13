@@ -17,3 +17,6 @@ tickRadius = 0.4
 
 pointerRadius :: Double
 pointerRadius = 0.3
+
+optionRadius :: Double
+optionRadius = 0.3

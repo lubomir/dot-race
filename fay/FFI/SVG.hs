@@ -45,3 +45,6 @@ svgMoveFront = ffi "%1.front()"
 
 svgScale :: Double -> Double -> Element -> Fay ()
 svgScale = ffi "%3.scale(%1, %2)"
+
+svgRemove :: Element -> Fay ()
+svgRemove = ffi "%1.remove()"
