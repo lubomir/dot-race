@@ -189,31 +189,38 @@ initGame _ = do
     playerTrace <- newVar [startPos !! 1]
     drawing <- initSVG drawingId
     canvas <- selectId "drawing"
+    options <- newVar []
     pointer <- svgCircle drawing pointerRadius >>= setClass "pointer"
     setXY (-10) (-10) pointer
 
     get zoom >>= \z -> do
         svgSize (z * (xmax + 0.5)) (z * (ymax + 0.5)) drawing
         draw track drawing
-        get playerTrace >>= drawMove drawing
+        trace <- get playerTrace
+        drawMove drawing trace
+        refreshOptions drawing track trace >>= set options
         svgScale z z drawing
 
     addEvent canvas "mousemove" $ \event -> do
         z <- get zoom
         (x, y) <- getPosition z canvas event
-        svgMoveFront pointer
-        if onTrack track (P x y)
-            then setXY (x - pointerRadius / 2) (y - pointerRadius / 2) pointer
+        opts <- get options
+        if P x y `elem` opts
+            then do
+                svgMoveFront pointer
+                setXY (x - pointerRadius / 2) (y - pointerRadius / 2) pointer
             else setXY (-10) (-10) pointer
 
     addEvent canvas "click" $ \event -> do
         z <- get zoom
         (x, y) <- getPosition z canvas event
-        modify playerTrace (P x y:)
-        trace <- get playerTrace
-        drawMove drawing trace
-        refreshOptions drawing track trace
-        return ()
+        opts <- get options
+        when (P x y `elem` opts) $ do
+            modify playerTrace (P x y:)
+            trace <- get playerTrace
+            drawMove drawing trace
+            refreshOptions drawing track trace >>= set options
+            return ()
 
     zoomInBtn <- selectId "zoom-in"
     addEvent zoomInBtn "click" $ \_ -> modify zoom zoomIn
