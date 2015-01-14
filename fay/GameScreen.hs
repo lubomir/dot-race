@@ -131,22 +131,22 @@ drawCrash drawing (P x y) = svgPolygon drawing pts >>= setClass "crashPoint"
     pts = [ P (x + q1) (y - q2)
           , P (x + q3) (y - q3)
           , P (x + q2) (y - q1)
-          , P (x + s ) (y     )
+          , P (x + s )  y
 
           , P (x + q2) (y + q1)
           , P (x + q3) (y + q3)
           , P (x + q1) (y + q2)
-          , P (x     ) (y + s )
+          , P  x       (y + s )
 
           , P (x - q1) (y + q2)
           , P (x - q3) (y + q3)
           , P (x - q2) (y + q1)
-          , P (x - s ) (y     )
+          , P (x - s )  y
 
           , P (x - q2) (y - q1)
           , P (x - q3) (y - q3)
           , P (x - q1) (y - q2)
-          , P (x     ) (y - s )
+          , P  x       (y - s )
           ]
 
 
