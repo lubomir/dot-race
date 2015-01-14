@@ -172,7 +172,12 @@ refreshOptions drawing track trace@(tp:_) = do
     return opts'
   where
     isValid :: Point -> Bool
-    isValid p = (p /= tp) && (p `isOnTrack` track)
+    isValid p = (p /= tp) && not90Deg p && (p `isOnTrack` track)
+
+    not90Deg :: Point -> Bool
+    not90Deg p = case trace of
+        (_:tp':_) -> distance p tp' >= 2
+        _ -> True
 
 initGame :: Event -> Fay ()
 initGame _ = do
