@@ -91,6 +91,7 @@ library
                  , random
                  , fay-jquery
                  , fay-text
+                 , process
 
 executable         dot-race
     if flag(library-only)

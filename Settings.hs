@@ -17,6 +17,7 @@ import Yesod.Default.Config2       (applyEnvValue, configSettingsYml)
 import Yesod.Default.Util          (WidgetFileSettings, widgetFileNoReload,
                                     widgetFileReload)
 import Yesod.Fay
+import System.Process              (readProcess)
 
 -- | Runtime settings to configure this application. These settings can be
 -- loaded from various sources: defaults, environment variables, config files,
@@ -111,7 +112,7 @@ fayFile' staticR moduleName =
   where
     settings = (yesodFaySettings moduleName)
         { yfsSeparateRuntime = Just ("static", staticR)
-        -- , yfsPostProcess = readProcess "java" ["-jar", "closure-compiler.jar"]
+        , yfsPostProcess = readProcess "closure-compiler" []
         , yfsExternal = Just ("static", staticR)
         , yfsPackages = ["fay-base", "fay-dom", "fay-jquery", "fay-text"]
         , yfsTypecheckDevel = True
