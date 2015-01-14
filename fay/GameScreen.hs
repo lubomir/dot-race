@@ -171,13 +171,15 @@ refreshOptions drawing track trace@(tp:_) = do
         opts -> mapM_ (drawOpt drawing) opts
     return opts'
   where
-    isValid :: Point -> Bool
-    isValid p = (p /= tp) && not90Deg p && (p `isOnTrack` track)
+    isValid p = (p /= tp) && not90Deg p && (p `isOnTrack` track) && notThruWall p
 
-    not90Deg :: Point -> Bool
     not90Deg p = case trace of
         (_:tp':_) -> distance p tp' >= 2
         _ -> True
+
+    notThruWall p = let ln = Line p tp
+                    in not (ln `intersectsWith` trackInner track) &&
+                       not (ln `intersectsWith` trackOuter track)
 
 initGame :: Event -> Fay ()
 initGame _ = do
