@@ -24,6 +24,8 @@ data TrackData = TrackData { track     :: Track
                            , outer     :: [Point]
                            , startLine :: (Point, Point)
                            , startPos  :: [Point]
+                           , innerSegments :: [Line]
+                           , outerSegments :: [Line]
                            }
 
 makeTrackData :: Track -> TrackData
@@ -33,6 +35,8 @@ makeTrackData track = TrackData {..}
     outer = trackOuter track
     startLine = trackStartLine track
     startPos = trackStartPos track
+    innerSegments = getSegments inner
+    outerSegments = getSegments outer
     (xmin, ymin, xmax, ymax) = extents outer
 
 readTrackData :: Fay String
@@ -178,8 +182,8 @@ drawOpt drawing (P x y) = do
 -- |Compute and redraw options. Returns the list of options or empty list on
 -- crash.
 --
-refreshOptions :: Element -> Track -> [Point] -> Fay [Point]
-refreshOptions drawing track trace@(tp:_) = do
+refreshOptions :: Element -> TrackData -> [Point] -> Fay [Point]
+refreshOptions drawing TrackData{..} trace@(tp:_) = do
     opts <- selectClass "option"
     mapM_ svgRemove opts
     let opts' = filter isValid $ getNeighbors $ getNextPoint trace
@@ -195,8 +199,8 @@ refreshOptions drawing track trace@(tp:_) = do
         _ -> True
 
     notThruWall p = let ln = Line p tp
-                    in not (ln `intersectsWith` trackInner track) &&
-                       not (ln `intersectsWith` trackOuter track)
+                    in not (ln `intersectsWithAny` innerSegments) &&
+                       not (ln `intersectsWithAny` outerSegments)
 
 initGame :: Event -> Fay ()
 initGame _ = do
@@ -215,7 +219,7 @@ initGame _ = do
         draw td drawing
         trace <- get playerTrace
         drawMove drawing trace
-        refreshOptions drawing track trace >>= set options
+        refreshOptions drawing td trace >>= set options
         svgScale z z drawing
 
     addEvent canvas "mousemove" $ \event -> do
@@ -236,7 +240,7 @@ initGame _ = do
             modify playerTrace (P x y:)
             trace <- get playerTrace
             drawMove drawing trace
-            refreshOptions drawing track trace >>= set options
+            refreshOptions drawing td trace >>= set options
             return ()
 
     zoomInBtn <- selectId "zoom-in"

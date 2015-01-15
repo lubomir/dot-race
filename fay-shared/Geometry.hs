@@ -3,7 +3,8 @@ module Geometry ( extents
                 , clamp
                 , translatePoint
                 , distance
-                , intersectsWith
+                , intersectsWithAny
+                , getSegments
                 ) where
 
 import Prelude
@@ -192,7 +193,7 @@ getSegments pg@(p0:_) = go pg
     go [p2] = [Line p2 p0]
     go (p1:p2:pss) = Line p1 p2 : go (p2:pss)
 
-
+{-
 -- |Check if line intersects a polygon.
 --
 -- >>> intersectsWith (Line (P 1 3) (P 1 6)) path
@@ -213,7 +214,13 @@ getSegments pg@(p0:_) = go pg
 intersectsWith :: Line -> Polygon -> Bool
 intersectsWith l pg
   | length pg < 3 = False
-  | otherwise = any (hasIntersection l) (getSegments pg)
+  | otherwise = intersectsWithAny l (getSegments pg)
+  -}
+
+-- |Check if line intersects any line in a list.
+--
+intersectsWithAny :: Line -> [Line] -> Bool
+intersectsWithAny l = any (hasIntersection l)
 
 -- |Translate the path by moving every single point.
 --
