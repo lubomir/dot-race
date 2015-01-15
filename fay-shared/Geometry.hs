@@ -196,7 +196,11 @@ extents p = (go myMin _x p, go myMin _y p, go myMax _x p, go myMax _y p)
 --
 getSegments :: Polygon -> [Line]
 getSegments [] = []
-getSegments pg@(p:ps) = zipWith Line pg (ps ++ [p])
+getSegments pg@(p0:_) = go pg
+  where
+    go [] = error "Empty list handled in `getSegments`, this can never happen"
+    go [p2] = [Line p2 p0]
+    go (p1:p2:pss) = Line p1 p2 : go (p2:pss)
 
 -- |Check if a point lies inside a polygon.
 --
