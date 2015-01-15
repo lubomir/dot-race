@@ -202,41 +202,6 @@ getSegments pg@(p0:_) = go pg
     go [p2] = [Line p2 p0]
     go (p1:p2:pss) = Line p1 p2 : go (p2:pss)
 
--- |Check if a point lies inside a polygon.
---
--- >>> P 0 0 `isInside` path
--- True
--- >>> P 2 (-3) `isInside` path
--- True
--- >>> P 6 2 `isInside` path
--- True
--- >>> P 4 4 `isInside` path
--- True
--- >>> P 3 (-1) `isInside` path
--- True
--- >>> P (-6) 3 `isInside` path
--- True
--- >>> P 10 0 `isInside` path
--- False
--- >>> P (-10) 0 `isInside` path
--- False
--- >>> P 0 10 `isInside` path
--- False
--- >>> P 0 (-10) `isInside` path
--- False
---
-isInside :: Point -> Polygon -> Bool
-isInside p pg
-  | length pg < 3 = False
-  | otherwise = (odd . length . filter inters . getSegments) pg
-  where inters (Line p1 p2) =  _y p >  min (_y p1) (_y p2)
-                            && _y p <= max (_y p1) (_y p2)
-                            && _x p <= max (_x p1) (_x p2)
-                            && not (almostEqual (_y p1) (_y p2))
-                            && correctInters p1 p2
-        correctInters p1 p2 =
-            let xinters = (_y p - _y p2) * (_x p1 - _x p2) / (_y p1 - _y p2) + _x p2
-            in _x p1 == _x p2 || _x p <= xinters
 
 -- |Check if line intersects a polygon.
 --
