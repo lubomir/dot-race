@@ -1,4 +1,10 @@
-module Geometry where
+module Geometry ( extents
+                , translate
+                , clamp
+                , translatePoint
+                , distance
+                , intersectsWith
+                ) where
 
 import Prelude
 
@@ -8,7 +14,10 @@ import SharedTypes
 -- >>> :{
 --  let path = zipWith P [0, 4, 7,  6,  1, -1, -3, -6, -7, -3]
 --                       [4, 5, 2, -2, -4,  1, -2, -1,  3,  5]
---  :}
+--      prettyLine (Line p1 p2) = concat [ show (_x p1) , "x" , show (_y p1)
+--                                       , "--"
+--                                       , show (_x p2) , "x" , show (_y p2)]
+-- :}
 
 
 -- |Check if two numbers are almost equal with precision of 99.99 %.
@@ -52,20 +61,6 @@ hypot x y = sqrt (x * x + y * y)
 distance :: Point -> Point -> Double
 distance a b = hypot (_x a - _x b) (_y a - _y b)
 
--- |Check if point has nearly integral coordinates.
---
--- >>> isAligned (P 1 1)
--- True
--- >>> isAligned (P 1.5 1.5)
--- False
--- >>> isAligned (P 1.1 1)
--- False
---
--- prop> \x y -> isAligned (P (fromIntegral x) (fromIntegral y))
---
-isAligned :: Point -> Bool
-isAligned p = p == clamp p
-
 -- |Round point to nearest integer coordinates. This takes a round trip through
 -- Int, so it will not work for arbitrarily larger numbers.
 --
@@ -79,12 +74,7 @@ clamp (P x y) = P (roundI x) (roundI y)
   where roundI = (fromIntegral :: Int -> Double) . round
 
 
--- |Format a line into human readable string
 --
-prettyLine :: Line -> String
-prettyLine (Line p1 p2) = concat [ show (_x p1) , "x" , show (_y p1)
-                                 , "--"
-                                 , show (_x p2) , "x" , show (_y p2)]
 
 -- |Check if a point lies on a line.
 --
