@@ -4,7 +4,7 @@ module GameScreen where
 
 import Prelude
 import FFI
-import JQuery hiding (not, filter)
+import JQuery (Event, Element)
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Var
@@ -56,24 +56,28 @@ addEvent :: Element -> String -> (Event -> Fay ()) -> Fay ()
 addEvent = ffi "$(%1).on(%2, %3)"
 
 eventPageX, eventPageY :: Event -> Fay Double
-eventPageX = ffi "%1['clientX']"
-eventPageY = ffi "%1['clientY']"
+eventPageX = ffi "%1['pageX']"
+eventPageY = ffi "%1['pageY']"
 
 getBoundingClientRect :: Element -> Fay Element
 getBoundingClientRect = ffi "%1.getBoundingClientRect()"
 
-rectLeft, rectTop :: Element -> Fay Double
+rectLeft, rectTop, getScrollTop, getScrollLeft :: Element -> Fay Double
 rectLeft = ffi "%1.left"
 rectTop = ffi "%1.top"
+getScrollTop = ffi "%1.scrollTop"
+getScrollLeft = ffi "%1.scrollLeft"
 
 eventLocation :: Element -> Event -> Fay (Double, Double)
 eventLocation element ev = do
     r <- getBoundingClientRect element
+    st <- getScrollTop element
+    sl <- getScrollLeft element
     t <- rectTop r
     l <- rectLeft r
     x <- eventPageX ev
     y <- eventPageY ev
-    return (x - l, y - t)
+    return (x - l + sl, y - t + st)
 
 setXY :: Double -> Double -> Element -> Fay ()
 setXY x y el = setX x el >> setY y el
