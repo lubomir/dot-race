@@ -15,22 +15,22 @@ import Constants
 import FFI.SVG
 
 readTrackData :: Fay String
-readTrackData = ffi "$('#track').val()"
+readTrackData = ffi "$('#track')['val']()"
 
 parseTrackData :: String -> Fay Track
-parseTrackData = ffi "JSON.parse(%1)"
+parseTrackData = ffi "JSON['parse'](%1)"
 
 drawingId :: Text
 drawingId = T.pack "drawing"
 
 addWindowEvent :: String -> (Event -> Fay ()) -> Fay ()
-addWindowEvent = ffi "window.addEventListener(%1, %2)"
+addWindowEvent = ffi "window['addEventListener'](%1, %2)"
 
 selectId :: String -> Fay Element
-selectId = ffi "document.getElementById(%1)"
+selectId = ffi "document['getElementById'](%1)"
 
 selectClass :: String -> Fay [Element]
-selectClass = ffi "document.getElementsByClassName(%1)"
+selectClass = ffi "document['getElementsByClassName'](%1)"
 
 drawGrid :: Track -> Element -> Fay ()
 drawGrid t@(Track inner outer _ _) drawing = do
@@ -53,20 +53,20 @@ drawStartLine drawing (P x1 y1, P x2 y2) =
     svgLine drawing x1 y1 x2 y2 >>= setClass "start_line"
 
 addEvent :: Element -> String -> (Event -> Fay ()) -> Fay ()
-addEvent = ffi "$(%1).on(%2, %3)"
+addEvent = ffi "$(%1)['on'](%2, %3)"
 
 eventPageX, eventPageY :: Event -> Fay Double
 eventPageX = ffi "%1['pageX']"
 eventPageY = ffi "%1['pageY']"
 
 getBoundingClientRect :: Element -> Fay Element
-getBoundingClientRect = ffi "%1.getBoundingClientRect()"
+getBoundingClientRect = ffi "%1['getBoundingClientRect']()"
 
 rectLeft, rectTop, getScrollTop, getScrollLeft :: Element -> Fay Double
-rectLeft = ffi "%1.left"
-rectTop = ffi "%1.top"
-getScrollTop = ffi "%1.scrollTop"
-getScrollLeft = ffi "%1.scrollLeft"
+rectLeft = ffi "%1['left']"
+rectTop = ffi "%1['top']"
+getScrollTop = ffi "%1['scrollTop']"
+getScrollLeft = ffi "%1['scrollLeft']"
 
 eventLocation :: Element -> Event -> Fay (Double, Double)
 eventLocation element ev = do
