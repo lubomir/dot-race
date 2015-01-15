@@ -116,6 +116,7 @@ fayFile' staticR moduleName =
         , yfsExternal = Just ("static", staticR)
         , yfsPackages = ["fay-base", "fay-dom", "fay-jquery", "fay-text"]
         , yfsTypecheckDevel = True
+        , yfsRequireJQuery = False
         }
 
 -- | Raw bytes at compile time of @config/settings.yml@
