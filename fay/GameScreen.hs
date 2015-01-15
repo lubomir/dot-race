@@ -8,11 +8,32 @@ import JQuery (Event, Element)
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Var
+import Data.Function (fmap)
 
 import SharedTypes
 import Geometry
 import Constants
 import FFI.SVG
+
+data TrackData = TrackData { track     :: Track
+                           , xmin      :: Double
+                           , xmax      :: Double
+                           , ymin      :: Double
+                           , ymax      :: Double
+                           , inner     :: [Point]
+                           , outer     :: [Point]
+                           , startLine :: (Point, Point)
+                           , startPos  :: [Point]
+                           }
+
+makeTrackData :: Track -> TrackData
+makeTrackData track = TrackData {..}
+  where
+    inner = trackInner track
+    outer = trackOuter track
+    startLine = trackStartLine track
+    startPos = trackStartPos track
+    (xmin, ymin, xmax, ymax) = extents outer
 
 readTrackData :: Fay String
 readTrackData = ffi "$('#track')['val']()"
@@ -32,18 +53,17 @@ selectId = ffi "document['getElementById'](%1)"
 selectClass :: String -> Fay [Element]
 selectClass = ffi "document['getElementsByClassName'](%1)"
 
-drawGrid :: Track -> Element -> Fay ()
-drawGrid t@(Track inner outer _ _) drawing = do
+drawGrid :: TrackData -> Element -> Fay ()
+drawGrid TrackData{..} drawing = do
     grid <- svgGroup drawing
-    let (_, _, w', h') = extents outer
-        w = round $ w' + 1
-        h = round $ h' + 1
+    let w = round $ xmax + 1
+        h = round $ ymax + 1
     forM_ [0..w+1] $ \x' ->
         let x = fromIntegral x'
-        in svgLine drawing x 0 x h' >>= setClass "grid" >>= groupAdd grid
+        in svgLine drawing x 0 x ymax >>= setClass "grid" >>= groupAdd grid
     forM_ [0..h+1] $ \y' ->
         let y = fromIntegral y'
-        in svgLine drawing 0 y w' y >>= setClass "grid" >>= groupAdd grid
+        in svgLine drawing 0 y xmax y >>= setClass "grid" >>= groupAdd grid
     innerOutline <- svgPolygon drawing inner >>= setClass "inner_grid_cover"
     outerOutline <- svgPolygon drawing outer
     grid `clipWith` outerOutline
@@ -82,16 +102,12 @@ eventLocation element ev = do
 setXY :: Double -> Double -> Element -> Fay ()
 setXY x y el = setX x el >> setY y el
 
-onTrack :: Track -> Point -> Bool
-onTrack (Track inner outer _ _) p =
-    (p `isInside` outer) && not (p `isInside` inner)
-
-draw :: Track -> Element -> Fay ()
-draw track@Track{..} drawing = do
-    drawGrid track drawing
-    drawStartLine drawing trackStartLine
-    _ <- svgPolygon drawing trackInner >>= setClass "outline"
-    _ <- svgPolygon drawing trackOuter >>= setClass "outline"
+draw :: TrackData -> Element -> Fay ()
+draw td@(TrackData{..}) drawing = do
+    drawGrid td drawing
+    drawStartLine drawing startLine
+    _ <- svgPolygon drawing inner >>= setClass "outline"
+    _ <- svgPolygon drawing outer >>= setClass "outline"
     return ()
 
 drawMove :: Element -> [Point] -> Fay ()
@@ -121,9 +137,6 @@ getNeighbors (P x y) = [ P (x + xd) (y + yd)
                        | xd <- [-1, 0, 1]
                        , yd <- [-1, 0, 1]
                        ]
-
-isOnTrack :: Point -> Track -> Bool
-isOnTrack p t = (p `isInside` trackOuter t) && not (p `isInside` trackInner t)
 
 drawCrash :: Element -> Point -> Fay Element
 drawCrash drawing (P x y) = svgPolygon drawing pts >>= setClass "crashPoint"
@@ -175,7 +188,7 @@ refreshOptions drawing track trace@(tp:_) = do
         opts -> mapM_ (drawOpt drawing) opts
     return opts'
   where
-    isValid p = (p /= tp)&& not90Deg p && {-(p `isOnTrack` track) && -}notThruWall p
+    isValid p = (p /= tp)&& not90Deg p && notThruWall p
 
     not90Deg p = case trace of
         (_:tp':_) -> distance p tp' >= 2
@@ -187,8 +200,8 @@ refreshOptions drawing track trace@(tp:_) = do
 
 initGame :: Event -> Fay ()
 initGame _ = do
-    track@(Track inner outer startLine startPos) <- readTrackData >>= parseTrackData
-    let (_, _, xmax, ymax) = extents outer
+    td@TrackData{..} <- makeTrackData `fmap` (readTrackData >>= parseTrackData)
+
     zoom <- newVar initialZoom
     playerTrace <- newVar [startPos !! 1]
     drawing <- initSVG drawingId
@@ -199,7 +212,7 @@ initGame _ = do
 
     get zoom >>= \z -> do
         svgSize (z * (xmax + 0.5)) (z * (ymax + 0.5)) drawing
-        draw track drawing
+        draw td drawing
         trace <- get playerTrace
         drawMove drawing trace
         refreshOptions drawing track trace >>= set options
