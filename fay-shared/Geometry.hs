@@ -186,12 +186,20 @@ hasIntersection l1@(Line (P x1 y1) (P x2 y2)) l2@(Line (P x3 y3) (P x4 y4)) =
              p = P (px / det) (py / det)
          in segmentHasPoint l1 p && segmentHasPoint l2 p)
 
+--
+-- |Check If bounded line has an intersection with another.
+--
+-- >>> hasIntersectionBounded (boundedLine (P 0 1) (P 2 2)) (boundedLine (P 1 1) (P 1 4))
+-- True
+-- >>> hasIntersectionBounded (boundedLine (P 5 6) (P 6 7)) (boundedLine (P 5.5 5.5) (P 5.5 12.4))
+-- True
+--
 hasIntersectionBounded :: BoundedLine -> BoundedLine -> Bool
 hasIntersectionBounded bl1 bl2 =
-    bottomMost bl1 > topMost bl2 &&
-    rightMost bl2 > leftMost bl2 &&
-    topMost bl1 < bottomMost bl2 &&
-    leftMost bl1 < rightMost bl2 &&
+    bottomMost bl1 >= topMost bl2 &&
+    rightMost bl2 >= leftMost bl2 &&
+    topMost bl1 <= bottomMost bl2 &&
+    leftMost bl1 <= rightMost bl2 &&
     hasIntersection (Line (p1 bl1) (p2 bl1)) (Line (p1 bl2) (p2 bl2))
 
 -- |Find extremes of a path.
