@@ -1,10 +1,10 @@
 -- {-# LANGUAGE EmptyDataDecls, OverloadedStrings, RebindableSyntax #-}
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE RecordWildCards, OverloadedStrings, RebindableSyntax #-}
 module GameScreen where
 
 import Prelude
 import FFI
-import Data.Text (Text)
+import Data.Text (Text, fromString)
 import qualified Data.Text as T
 import Data.Var
 import Data.Function (fmap)
@@ -41,7 +41,7 @@ makeTrackData track = TrackData {..}
     (xmin, ymin, xmax, ymax) = extents outer
 
 drawingId :: Text
-drawingId = T.pack "drawing"
+drawingId = "drawing"
 
 drawGrid :: TrackData -> Element -> Fay ()
 drawGrid TrackData{..} drawing = do
@@ -102,33 +102,7 @@ getNeighbors (P x y) = [ P (x + xd) (y + yd)
                        ]
 
 drawCrash :: Element -> Point -> Fay Element
-drawCrash drawing (P x y) = svgPolygon drawing pts >>= setClass "crashPoint"
-  where
-    s = 0.5
-    q1 = s * 0.2
-    q2 = s * 0.4
-    q3 = s * 0.7
-    pts = [ P (x + q1) (y - q2)
-          , P (x + q3) (y - q3)
-          , P (x + q2) (y - q1)
-          , P (x + s )  y
-
-          , P (x + q2) (y + q1)
-          , P (x + q3) (y + q3)
-          , P (x + q1) (y + q2)
-          , P  x       (y + s )
-
-          , P (x - q1) (y + q2)
-          , P (x - q3) (y + q3)
-          , P (x - q2) (y + q1)
-          , P (x - s )  y
-
-          , P (x - q2) (y - q1)
-          , P (x - q3) (y - q3)
-          , P (x - q1) (y - q2)
-          , P  x       (y - s )
-          ]
-
+drawCrash drawing p = svgPolygon drawing (crashMark p) >>= setClass "crashPoint"
 
 drawOpt :: Element -> Point -> Fay Element
 drawOpt drawing (P x y) = do
@@ -173,7 +147,7 @@ initGame _ = do
     setXY (-10) (-10) pointer
 
     get zoom >>= \z -> do
-        svgSize (z * (xmax + 0.5)) (z * (ymax + 0.5)) drawing
+        svgSize (z * (xmax + canvasPadding)) (z * (ymax + canvasPadding)) drawing
         draw td drawing
         trace <- get playerTrace
         drawMove drawing trace
@@ -209,7 +183,7 @@ initGame _ = do
 
     _ <- subscribe zoom $ \z -> do
         svgScale z z drawing
-        svgSize (z * (xmax + 0.5)) (z * (ymax + 0.5)) drawing
+        svgSize (z * (xmax + canvasPadding)) (z * (ymax + canvasPadding)) drawing
     return ()
 
 zoomIn :: Double -> Double

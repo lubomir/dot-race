@@ -30,7 +30,7 @@ svgCircle = ffi "%1['circle'](%2)"
 svgLine :: Element -> Double -> Double -> Double -> Double -> Fay Element
 svgLine = ffi "%1['line'](%2, %3, %4, %5)"
 
-setClass :: String -> Element -> Fay Element
+setClass :: Text -> Element -> Fay Element
 setClass = ffi "%2['attr']('class', %1)"
 
 clipWith :: Element -> Element -> Fay ()

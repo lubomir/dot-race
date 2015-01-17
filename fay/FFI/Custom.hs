@@ -6,22 +6,22 @@ import Data.Text (Text)
 import FFI.Types
 import SharedTypes (Track)
 
-readTrackData :: Fay String
+readTrackData :: Fay Text
 readTrackData = ffi "$('#track')['val']()"
 
-parseTrackData :: String -> Fay Track
+parseTrackData :: Text -> Fay Track
 parseTrackData = ffi "JSON['parse'](%1)"
 
-addWindowEvent :: String -> (Event -> Fay ()) -> Fay ()
+addWindowEvent :: Text -> (Event -> Fay ()) -> Fay ()
 addWindowEvent = ffi "window['addEventListener'](%1, %2)"
 
-selectId :: String -> Fay Element
+selectId :: Text -> Fay Element
 selectId = ffi "document['getElementById'](%1)"
 
-selectClass :: String -> Fay [Element]
+selectClass :: Text -> Fay [Element]
 selectClass = ffi "document['getElementsByClassName'](%1)"
 
-addEvent :: Element -> String -> (Event -> Fay ()) -> Fay ()
+addEvent :: Element -> Text -> (Event -> Fay ()) -> Fay ()
 addEvent = ffi "$(%1)['on'](%2, %3)"
 
 eventPageX, eventPageY :: Event -> Fay Double
@@ -47,4 +47,3 @@ eventLocation element ev = do
     x <- eventPageX ev
     y <- eventPageY ev
     return (x - l + sl, y - t + st)
-
