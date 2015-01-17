@@ -24,8 +24,8 @@ data TrackData = TrackData { track     :: Track
                            , outer     :: [Point]
                            , startLine :: (Point, Point)
                            , startPos  :: [Point]
-                           , innerSegments :: [Line]
-                           , outerSegments :: [Line]
+                           , innerSegments :: [BoundedLine]
+                           , outerSegments :: [BoundedLine]
                            }
 
 makeTrackData :: Track -> TrackData
@@ -35,8 +35,8 @@ makeTrackData track = TrackData {..}
     outer = trackOuter track
     startLine = trackStartLine track
     startPos = trackStartPos track
-    innerSegments = getSegments inner
-    outerSegments = getSegments outer
+    innerSegments = map toBoundedLine $ getSegments inner
+    outerSegments = map toBoundedLine $ getSegments outer
     (xmin, ymin, xmax, ymax) = extents outer
 
 readTrackData :: Fay String
@@ -198,9 +198,9 @@ refreshOptions drawing TrackData{..} trace@(tp:_) = do
         (_:tp':_) -> distance p tp' >= 2
         _ -> True
 
-    notThruWall p = let ln = Line p tp
-                    in not (ln `intersectsWithAny` innerSegments) &&
-                       not (ln `intersectsWithAny` outerSegments)
+    notThruWall p = let ln = toBoundedLine (Line p tp)
+                    in not (ln `intersectsWithAnyBounded` innerSegments) &&
+                       not (ln `intersectsWithAnyBounded` outerSegments)
 
 initGame :: Event -> Fay ()
 initGame _ = do

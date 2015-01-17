@@ -1,3 +1,4 @@
+{-# LANGUAGE RecordWildCards #-}
 module Geometry ( extents
                 , translate
                 , clamp
@@ -5,11 +6,29 @@ module Geometry ( extents
                 , distance
                 , intersectsWithAny
                 , getSegments
+                , intersectsWithAnyBounded
+                , toBoundedLine
+                , BoundedLine
                 ) where
 
 import Prelude
 
 import SharedTypes
+
+data BoundedLine = BoundedLine { p1             :: Point
+                               , p2             :: Point
+                               , leftMost       :: Double
+                               , rightMost      :: Double
+                               , topMost        :: Double
+                               , bottomMost     :: Double
+                               }
+
+toBoundedLine :: Line -> BoundedLine
+toBoundedLine (Line p1@(P x1 y1) p2@(P x2 y2)) = BoundedLine {..}
+  where leftMost = min x1 x2
+        rightMost = max x1 x2
+        topMost = min y1 y2
+        bottomMost = max y1 y2
 
 -- $setup
 -- >>> :{
@@ -167,6 +186,14 @@ hasIntersection l1@(Line (P x1 y1) (P x2 y2)) l2@(Line (P x3 y3) (P x4 y4)) =
              p = P (px / det) (py / det)
          in segmentHasPoint l1 p && segmentHasPoint l2 p)
 
+hasIntersectionBounded :: BoundedLine -> BoundedLine -> Bool
+hasIntersectionBounded bl1 bl2 =
+    bottomMost bl1 > topMost bl2 &&
+    rightMost bl2 > leftMost bl2 &&
+    topMost bl1 < bottomMost bl2 &&
+    leftMost bl1 < rightMost bl2 &&
+    hasIntersection (Line (p1 bl1) (p2 bl1)) (Line (p1 bl2) (p2 bl2))
+
 -- |Find extremes of a path.
 --
 -- >>> extents path
@@ -225,6 +252,9 @@ intersectsWith l pg
 --
 intersectsWithAny :: Line -> [Line] -> Bool
 intersectsWithAny l = any (hasIntersection l)
+
+intersectsWithAnyBounded :: BoundedLine -> [BoundedLine] -> Bool
+intersectsWithAnyBounded l = any (hasIntersectionBounded l)
 
 -- |Translate the path by moving every single point.
 --
