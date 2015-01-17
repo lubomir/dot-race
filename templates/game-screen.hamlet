@@ -3,7 +3,7 @@
 <div .navbar .navbar-fixed-top .navbar-inverse>
     <div .container-fluid>
         <div .navbar-header>
-            <a .navbar-brand>Dot Race
+            <a .navbar-brand href="/">Dot Race
         <div>
             <ul .nav .navbar-nav .navbar-right>
                 <li>
