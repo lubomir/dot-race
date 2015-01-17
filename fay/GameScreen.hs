@@ -140,7 +140,7 @@ initGame _ = do
     zoom <- newVar initialZoom
     playerTrace <- newVar [startPos !! 1]
     drawing <- initSVG drawingId
-    canvas <- selectId "drawing"
+    canvas <- selectId drawingId
     options <- newVar []
     pointer <- svgCircle drawing pointerRadius >>= setClass "pointer"
     setXY (-10) (-10) pointer
