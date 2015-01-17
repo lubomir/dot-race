@@ -1,4 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# OPTIONS -fno-warn-orphans #-}
 module Geometry ( extents
                 , translate
                 , clamp
