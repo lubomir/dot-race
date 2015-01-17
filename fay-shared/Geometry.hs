@@ -4,11 +4,10 @@ module Geometry ( extents
                 , clamp
                 , translatePoint
                 , distance
-                , intersectsWithAny
                 , getSegments
                 , intersectsWithAnyBounded
-                , toBoundedLine
                 , BoundedLine
+                , boundedLine
                 ) where
 
 import Prelude
@@ -23,8 +22,8 @@ data BoundedLine = BoundedLine { p1             :: Point
                                , bottomMost     :: Double
                                }
 
-toBoundedLine :: Line -> BoundedLine
-toBoundedLine (Line p1@(P x1 y1) p2@(P x2 y2)) = BoundedLine {..}
+boundedLine :: Point -> Point -> BoundedLine
+boundedLine p1@(P x1 y1) p2@(P x2 y2) = BoundedLine {..}
   where leftMost = min x1 x2
         rightMost = max x1 x2
         topMost = min y1 y2
@@ -34,9 +33,9 @@ toBoundedLine (Line p1@(P x1 y1) p2@(P x2 y2)) = BoundedLine {..}
 -- >>> :{
 --  let path = zipWith P [0, 4, 7,  6,  1, -1, -3, -6, -7, -3]
 --                       [4, 5, 2, -2, -4,  1, -2, -1,  3,  5]
---      prettyLine (Line p1 p2) = concat [ show (_x p1) , "x" , show (_y p1)
---                                       , "--"
---                                       , show (_x p2) , "x" , show (_y p2)]
+--      prettyLine bl = concat [ show (_x $ p1 bl) , "x" , show (_y $ p1 bl)
+--                             , "--"
+--                             , show (_x $ p2 bl) , "x" , show (_y $ p2 bl)]
 -- :}
 
 
@@ -216,13 +215,13 @@ extents = go (1e8, 1e8, 0, 0)
 -- >>> map prettyLine $ getSegments [P 0 0, P 0 1, P 1 1, P 1 0]
 -- ["0.0x0.0--0.0x1.0","0.0x1.0--1.0x1.0","1.0x1.0--1.0x0.0","1.0x0.0--0.0x0.0"]
 --
-getSegments :: Polygon -> [Line]
+getSegments :: Polygon -> [BoundedLine]
 getSegments [] = []
 getSegments pg@(p0:_) = go pg
   where
     go [] = error "Empty list handled in `getSegments`, this can never happen"
-    go [p2] = [Line p2 p0]
-    go (p1:p2:pss) = Line p1 p2 : go (p2:pss)
+    go [p2] = [boundedLine p2 p0]
+    go (p1:p2:pss) = boundedLine p1 p2 : go (p2:pss)
 
 {-
 -- |Check if line intersects a polygon.

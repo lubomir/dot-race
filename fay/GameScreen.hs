@@ -35,8 +35,8 @@ makeTrackData track = TrackData {..}
     outer = trackOuter track
     startLine = trackStartLine track
     startPos = trackStartPos track
-    innerSegments = map toBoundedLine $ getSegments inner
-    outerSegments = map toBoundedLine $ getSegments outer
+    innerSegments = getSegments inner
+    outerSegments = getSegments outer
     (xmin, ymin, xmax, ymax) = extents outer
 
 readTrackData :: Fay String
@@ -198,7 +198,7 @@ refreshOptions drawing TrackData{..} trace@(tp:_) = do
         (_:tp':_) -> distance p tp' >= 2
         _ -> True
 
-    notThruWall p = let ln = toBoundedLine (Line p tp)
+    notThruWall p = let ln = boundedLine p tp
                     in not (ln `intersectsWithAnyBounded` innerSegments) &&
                        not (ln `intersectsWithAnyBounded` outerSegments)
 
