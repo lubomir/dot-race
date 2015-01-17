@@ -31,14 +31,14 @@ loadTracks dir = do
     isYaml p = p `hasExtension` "yaml"
 
 
--- | Move track so that there is no empty space on the right or above it.
+-- | Move track so that there is no empty space on the left or above it.
 --
 normalizeTrack :: Track -> Track
 normalizeTrack Track{..} =
     let (xmin, ymin, _, _) = extents trackOuter
         (start, end) = trackStartLine
-        x' = max (0.5 - xmin) 0
-        y' = max (0.5 - ymin) 0
+        x' = negate $ max (xmin - 0.5) 0
+        y' = negate $ max (ymin - 0.5) 0
         shift = translate x' y'
         shiftP = clamp . translatePoint x' y'
    in Track { trackInner = shift trackInner
