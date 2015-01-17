@@ -143,13 +143,12 @@ drawOpt drawing (P x y) = do
 --
 refreshOptions :: Element -> TrackData -> [Point] -> Fay [Point]
 refreshOptions drawing TrackData{..} trace@(tp:_) = do
-    opts <- selectClass "option"
-    mapM_ svgRemove opts
-    let opts' = filter isValid $ getNeighbors $ getNextPoint trace
-    case opts' of
-        [] -> drawCrash drawing tp >> return ()
-        opts -> mapM_ (drawOpt drawing) opts
-    return opts'
+    selectClass "option" >>= mapM_ svgRemove
+    let opts = filter isValid $ getNeighbors $ getNextPoint trace
+    if null opts
+        then drawCrash drawing tp >> return ()
+        else mapM_ (drawOpt drawing) opts
+    return opts
   where
     isValid p = (p /= tp) && not90Deg p && notThruWall p
 
