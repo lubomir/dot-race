@@ -4,7 +4,6 @@ module GameScreen where
 
 import Prelude
 import FFI
-import JQuery (Event, Element)
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Var
@@ -15,6 +14,7 @@ import Geometry
 import Constants
 import FFI.SVG
 import FFI.Custom
+import FFI.Types
 
 data TrackData = TrackData { track     :: Track
                            , xmin      :: Double

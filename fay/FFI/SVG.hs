@@ -1,9 +1,9 @@
 module FFI.SVG where
 
-import JQuery hiding (not)
 import Data.Text (Text)
 import FFI
 
+import FFI.Types
 import SharedTypes
 
 initSVG :: Text -> Fay Element

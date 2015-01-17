@@ -1,9 +1,9 @@
 module FFI.Custom where
 
 import FFI
-import JQuery (Event, Element)
 import Data.Text (Text)
 
+import FFI.Types
 import SharedTypes (Track)
 
 readTrackData :: Fay String
