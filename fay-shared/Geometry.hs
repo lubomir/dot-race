@@ -223,35 +223,8 @@ getSegments pg@(p0:_) = go pg
     go [p2] = [boundedLine p2 p0]
     go (p1:p2:pss) = boundedLine p1 p2 : go (p2:pss)
 
-{-
--- |Check if line intersects a polygon.
---
--- >>> intersectsWith (Line (P 1 3) (P 1 6)) path
--- True
--- >>> intersectsWith (Line (P (-4) (-3)) (P 1 (-2))) path
--- True
--- >>> intersectsWith (Line (P (-4) (-3)) (P (-5) 6)) path
--- True
--- >>> intersectsWith (Line (P 5 3) (P 1 6)) path
--- True
--- >>> intersectsWith (Line (P 1 3) (P 5 3)) path
--- False
--- >>> intersectsWith (Line (P 1 6) (P (-5) (-6))) path
--- True
--- >>> intersectsWith (Line (P 1 6) (P (-5) 6)) path
--- False
---
-intersectsWith :: Line -> Polygon -> Bool
-intersectsWith l pg
-  | length pg < 3 = False
-  | otherwise = intersectsWithAny l (getSegments pg)
-  -}
-
 -- |Check if line intersects any line in a list.
 --
-intersectsWithAny :: Line -> [Line] -> Bool
-intersectsWithAny l = any (hasIntersection l)
-
 intersectsWithAnyBounded :: BoundedLine -> [BoundedLine] -> Bool
 intersectsWithAnyBounded l = any (hasIntersectionBounded l)
 

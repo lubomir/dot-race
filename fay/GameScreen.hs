@@ -192,7 +192,7 @@ refreshOptions drawing TrackData{..} trace@(tp:_) = do
         opts -> mapM_ (drawOpt drawing) opts
     return opts'
   where
-    isValid p = (p /= tp)&& not90Deg p && notThruWall p
+    isValid p = (p /= tp) && not90Deg p && notThruWall p
 
     not90Deg p = case trace of
         (_:tp':_) -> distance p tp' >= 2
