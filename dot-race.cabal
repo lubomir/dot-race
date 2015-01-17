@@ -89,7 +89,6 @@ library
                  , system-filepath
                  , websockets
                  , random
-                 , fay-jquery
                  , fay-text
                  , process
 

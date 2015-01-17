@@ -114,7 +114,7 @@ fayFile' staticR moduleName =
         { yfsSeparateRuntime = Just ("static", staticR)
         , yfsPostProcess = readProcess "closure-compiler" []
         , yfsExternal = Just ("static", staticR)
-        , yfsPackages = ["fay-base", "fay-dom", "fay-jquery", "fay-text"]
+        , yfsPackages = ["fay-base", "fay-dom", "fay-text"]
         , yfsTypecheckDevel = True
         , yfsRequireJQuery = False
         }
