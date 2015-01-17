@@ -1,4 +1,3 @@
--- {-# LANGUAGE EmptyDataDecls, OverloadedStrings, RebindableSyntax #-}
 {-# LANGUAGE RecordWildCards, OverloadedStrings, RebindableSyntax #-}
 module GameScreen where
 
