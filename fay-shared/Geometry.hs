@@ -173,11 +173,15 @@ hasIntersection l1@(Line (P x1 y1) (P x2 y2)) l2@(Line (P x3 y3) (P x4 y4)) =
 -- (-7.0,-4.0,7.0,5.0)
 --
 extents :: Path -> (Double, Double, Double, Double)
-extents p = (go myMin _x p, go myMin _y p, go myMax _x p, go myMax _y p)
+extents = go (1e8, 1e8, 0, 0)
   where
-    go f g = f . map g
-    myMin = foldr1 min
-    myMax = foldr1 max
+    go acc [] = acc
+    go (xmin, ymin, xmax, ymax) (P x y:xs) =
+        let xmin' = min x xmin
+            ymin' = min y ymin
+            xmax' = max x xmax
+            ymax' = max y ymax
+        in xmin' `seq` ymin' `seq` xmax' `seq` ymax' `seq` go (xmin', ymin', xmax', ymax') xs
 
 
 -- |Get a list of line segments for given polygon.
