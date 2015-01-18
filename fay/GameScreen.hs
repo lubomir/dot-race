@@ -183,6 +183,10 @@ initGame _ = do
     _ <- subscribe zoom $ \z -> do
         svgScale z z drawing
         svgSize (z * (xmax + canvasPadding)) (z * (ymax + canvasPadding)) drawing
+
+    joinButton <- selectId "joinButton"
+    addEvent joinButton "click" $ \_ ->
+        selectId "join-game-dialog" >>= hide
     return ()
 
 zoomIn :: Double -> Double

@@ -47,3 +47,6 @@ eventLocation element ev = do
     x <- eventPageX ev
     y <- eventPageY ev
     return (x - l + sl, y - t + st)
+
+hide :: Element -> Fay ()
+hide = ffi "%1.remove()"
