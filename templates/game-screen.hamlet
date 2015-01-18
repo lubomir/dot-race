@@ -24,3 +24,25 @@
             <div #chat>
                 <div>
                 <textarea>
+
+<div .modal .show #join-game-dialog role=dialog tabindex=-1>
+    <div .modal-dialog>
+        <div .modal-content>
+            <div .modal-header>
+                <h4 .modal-title>
+                    Join game
+            <div .modal-body>
+                <form .form-horizontal>
+                    <div .form-group>
+                        <label .col-sm-2 .control-label for="inputName">
+                            Name
+                        <div .col-sm-10>
+                            <input type=text .form-control #inputName>
+                    <div .form-group>
+                        <label .col-sm-2 .control-label>
+                            Color
+                        <div .col-sm-10>
+                            <div .color-preview>
+            <div .modal-footer>
+                <button type="button" .btn .btn-primary #joinButton>
+                    Join
