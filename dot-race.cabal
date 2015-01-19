@@ -91,7 +91,7 @@ library
                  , random
                  , process
 
-executable         dot-race
+executable         server
     if flag(library-only)
         Buildable: False
 
