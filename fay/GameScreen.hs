@@ -20,7 +20,7 @@ data TrackData = TrackData { track     :: Track
                            , innerExtents :: Extremes
                            , inner     :: [Point]
                            , outer     :: [Point]
-                           , startLine :: (Point, Point)
+                           , startLine :: Line
                            , startPos  :: [Point]
                            , innerSegments :: [BoundedLine]
                            , outerSegments :: [BoundedLine]
@@ -31,7 +31,7 @@ makeTrackData track = TrackData {..}
   where
     inner = trackInner track
     outer = trackOuter track
-    startLine = trackStartLine track
+    startLine = uncurry Line $ trackStartLine track
     startPos = trackStartPos track
     innerSegments = getSegments inner
     outerSegments = getSegments outer
@@ -58,8 +58,8 @@ drawGrid TrackData{..} drawing = do
     outerOutline <- svgPolygon drawing outer
     grid `clipWith` outerOutline
 
-drawStartLine :: Element -> (Point, Point) -> Fay Element
-drawStartLine drawing (P x1 y1, P x2 y2) =
+drawStartLine :: Element -> Line -> Fay Element
+drawStartLine drawing (Line (P x1 y1) (P x2 y2)) =
     svgLine drawing x1 y1 x2 y2 >>= setClass "start_line"
 
 setXY :: Double -> Double -> Element -> Fay ()
@@ -140,6 +140,7 @@ initGame _ = do
 
     zoom <- newVar initialZoom
     playerTrace <- newVar [startPos !! 1]
+    playerExtents <- newVar (Extremes (eXMax outerExtents) 0 (eYMax outerExtents) 0)
     drawing <- initSVG drawingId
     canvas <- selectId drawingId
     options <- newVar []
@@ -172,7 +173,11 @@ initGame _ = do
         opts <- get options
         when (P x y `elem` opts) $ do
             modify playerTrace (P x y:)
+            modify playerExtents (updateExtremes (P x y))
+            reached <- get playerExtents
             trace <- get playerTrace
+            when (encapsulates innerExtents reached && hasWinningMove trace startLine) $ do
+                print "You won"
             drawMove drawing trace
             refreshOptions drawing td trace >>= set options
             return ()
@@ -193,6 +198,23 @@ initGame _ = do
     addEvent joinButton "click" $ \_ ->
         selectId "join-game-dialog" >>= hide
     return ()
+
+updateExtremes :: Point -> Extremes -> Extremes
+updateExtremes (P x y) ex = Extremes { eXMin = min x (eXMin ex)
+                                     , eXMax = max x (eXMax ex)
+                                     , eYMin = min y (eYMin ex)
+                                     , eYMax = max y (eYMax ex)
+                                     }
+
+hasWinningMove :: [Point] -> Line -> Bool
+hasWinningMove (p2:p1:_) ln = Line p1 p2 `hasIntersection` ln
+hasWinningMove _ _ = False
+
+encapsulates :: Extremes -> Extremes -> Bool
+encapsulates inner outer = eXMin outer < eXMin inner
+                        && eYMin outer < eYMin inner
+                        && eXMax outer > eXMax inner
+                        && eYMax outer > eYMax inner
 
 zoomIn :: Double -> Double
 zoomIn now = if now < maxZoom then now + zoomIncrement else now

@@ -9,6 +9,8 @@ module Geometry ( extents
                 , intersectsWithAnyBounded
                 , BoundedLine
                 , boundedLine
+                , hasIntersection
+                , Line
                 ) where
 
 import Prelude
