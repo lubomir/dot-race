@@ -16,10 +16,8 @@ import FFI.Custom
 import FFI.Types
 
 data TrackData = TrackData { track     :: Track
-                           , xmin      :: Double
-                           , xmax      :: Double
-                           , ymin      :: Double
-                           , ymax      :: Double
+                           , outerExtents :: Extremes
+                           , innerExtents :: Extremes
                            , inner     :: [Point]
                            , outer     :: [Point]
                            , startLine :: (Point, Point)
@@ -37,7 +35,8 @@ makeTrackData track = TrackData {..}
     startPos = trackStartPos track
     innerSegments = getSegments inner
     outerSegments = getSegments outer
-    (xmin, ymin, xmax, ymax) = extents outer
+    outerExtents = extents outer
+    innerExtents = extents inner
 
 drawingId :: Text
 drawingId = "drawing"
@@ -45,7 +44,9 @@ drawingId = "drawing"
 drawGrid :: TrackData -> Element -> Fay ()
 drawGrid TrackData{..} drawing = do
     grid <- svgGroup drawing
-    let w = round $ xmax + 1
+    let xmax = eXMax outerExtents
+        ymax = eYMax outerExtents
+        w = round $ xmax + 1
         h = round $ ymax + 1
     forM_ [0..w+1] $ \x' ->
         let x = fromIntegral x'
@@ -146,7 +147,9 @@ initGame _ = do
     setXY (-10) (-10) pointer
 
     get zoom >>= \z -> do
-        svgSize (z * (xmax + canvasPadding)) (z * (ymax + canvasPadding)) drawing
+        svgSize (z * (eXMax outerExtents + canvasPadding))
+                (z * (eYMax outerExtents + canvasPadding))
+                drawing
         draw td drawing
         trace <- get playerTrace
         drawMove drawing trace
@@ -182,7 +185,9 @@ initGame _ = do
 
     _ <- subscribe zoom $ \z -> do
         svgScale z z drawing
-        svgSize (z * (xmax + canvasPadding)) (z * (ymax + canvasPadding)) drawing
+        svgSize (z * (eXMax outerExtents + canvasPadding))
+                (z * (eYMax outerExtents + canvasPadding))
+                drawing
 
     joinButton <- selectId "joinButton"
     addEvent joinButton "click" $ \_ ->

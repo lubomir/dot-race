@@ -29,6 +29,12 @@ data Track = Track { trackInner     :: [Point]
                    , trackStartPos  :: [Point]
                    }
 
+data Extremes = Extremes { eXMin :: Double
+                         , eXMax :: Double
+                         , eYMin :: Double
+                         , eYMax :: Double
+                         }
+
 #ifndef FAY
 instance FromJSON Point where
     parseJSON (Object o) = P <$> o .: "x" <*> o .: "y"

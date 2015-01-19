@@ -207,8 +207,9 @@ hasIntersectionBounded bl1 bl2 =
 -- >>> extents path
 -- (-7.0,-4.0,7.0,5.0)
 --
-extents :: Path -> (Double, Double, Double, Double)
-extents = go (1e8, 1e8, 0, 0)
+extents :: Path -> Extremes
+extents p = let (eXMin, eYMin, eXMax, eYMax) = go (1e8, 1e8, 0, 0) p
+            in Extremes {..}
   where
     go acc [] = acc
     go (xmin, ymin, xmax, ymax) (P x y:xs) =

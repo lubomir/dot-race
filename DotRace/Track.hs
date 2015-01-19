@@ -35,7 +35,7 @@ loadTracks dir = do
 --
 normalizeTrack :: Track -> Track
 normalizeTrack Track{..} =
-    let (xmin, ymin, _, _) = extents trackOuter
+    let (Extremes xmin _ ymin _) = extents trackOuter
         (start, end) = trackStartLine
         x' = negate $ max (xmin - 0.5) 0
         y' = negate $ max (ymin - 0.5) 0
