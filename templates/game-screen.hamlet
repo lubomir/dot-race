@@ -41,3 +41,15 @@
             <div .modal-footer>
                 <button type="button" .btn .btn-primary #joinButton>
                     Join
+
+<div .modal #crash-dialog role=dialog tabindex=-1>
+    <div .modal-dialog>
+        <div .modal-content>
+            <div .modal-header>
+                <h4 .modal-title>
+                    Game over!
+            <div .modal-body>
+                <p>
+                    <b>
+                        Boom!
+                    You crashed!

@@ -14,6 +14,7 @@ import Constants
 import FFI.SVG
 import FFI.Custom
 import FFI.Types
+import FFI.Bootstrap
 
 data TrackData = TrackData { track     :: Track
                            , outerExtents :: Extremes
@@ -120,7 +121,7 @@ refreshOptions drawing TrackData{..} trace@(tp:_) = do
     selectClass "option" >>= mapM_ svgRemove
     let opts = filter isValid $ getNeighbors $ getNextPoint trace
     if null opts
-        then drawCrash drawing tp >> return ()
+        then drawCrash drawing tp >> showCrashDialog
         else mapM_ (drawOpt drawing) opts
     return opts
   where
