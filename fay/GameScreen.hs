@@ -147,6 +147,7 @@ initGame _ = do
     options <- newVar []
     pointer <- svgCircle drawing pointerRadius >>= setClass "pointer"
     setXY (-10) (-10) pointer
+    conn <- getWSConnection
 
     get zoom >>= \z -> do
         svgSize (z * (eXMax outerExtents + canvasPadding))
@@ -169,6 +170,8 @@ initGame _ = do
             else setXY (-10) (-10) pointer
 
     addEvent canvas "click" $ \event -> do
+        sendText conn "click"
+        print "click"
         z <- get zoom
         (x, y) <- getPosition z canvas event
         opts <- get options
@@ -195,9 +198,17 @@ initGame _ = do
                 (z * (eYMax outerExtents + canvasPadding))
                 drawing
 
+    conn `onMessage` \e -> do
+        print "onMessage"
+        t <- getText e
+        print t
+        addChatMessage t
+
     joinButton <- selectId "joinButton"
-    addEvent joinButton "click" $ \_ ->
+    addEvent joinButton "click" $ \_ -> do
         selectId "join-game-dialog" >>= hide
+        sendText conn "Hello"
+
     return ()
 
 updateExtremes :: Point -> Extremes -> Extremes

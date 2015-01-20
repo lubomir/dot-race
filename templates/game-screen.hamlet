@@ -42,7 +42,7 @@
                 <button type="button" .btn .btn-primary #joinButton>
                     Join
 
-<div .modal #crash-dialog role=dialog tabindex=-1>
+<div .modal .fade #crash-dialog role=dialog tabindex=-1>
     <div .modal-dialog>
         <div .modal-content>
             <div .modal-header>

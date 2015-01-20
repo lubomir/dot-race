@@ -88,6 +88,7 @@ library
                  , fay-dom
                  , system-filepath
                  , websockets
+                 , yesod-websockets
                  , random
                  , process
 

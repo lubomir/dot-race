@@ -49,4 +49,19 @@ eventLocation element ev = do
     return (x - l + sl, y - t + st)
 
 hide :: Element -> Fay ()
-hide = ffi "%1.remove()"
+hide = ffi "%1['remove']()"
+
+getWSConnection :: Fay Connection
+getWSConnection = ffi "new WebSocket(document['URL']['replace']('http', 'ws'))"
+
+onMessage :: Connection -> (Event -> Fay ()) -> Fay ()
+onMessage = ffi "%1['onmessage'] = %2"
+
+getText :: Event -> Fay Text
+getText = ffi "%1['data']"
+
+sendText :: Connection -> Text -> Fay ()
+sendText = ffi "%1['send'](%2)"
+
+addChatMessage :: Text -> Fay ()
+addChatMessage = ffi "$('#chat div').append('<p>'+%1+'</p>')"
