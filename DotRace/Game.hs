@@ -5,6 +5,7 @@ import qualified Network.WebSockets as WS
 import ClassyPrelude
 import System.Random
 import Text.Printf
+import Control.Concurrent.STM.TChan
 
 import SharedTypes
 
@@ -15,6 +16,7 @@ type Player = (Text, WS.Connection)
 data Game = Game { gameTrack :: Track
                  , gameNumPlayers :: Int
                  , gamePlayers :: [Player]
+                 , gameChannel :: TChan Text
                  }
 
 mkGameId :: IO GameId

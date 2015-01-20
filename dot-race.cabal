@@ -91,6 +91,7 @@ library
                  , yesod-websockets
                  , random
                  , process
+                 , stm
 
 executable         server
     if flag(library-only)

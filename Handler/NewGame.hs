@@ -4,6 +4,7 @@ import Import
 
 import Yesod.Form.Bootstrap3
 import Data.Map (keys, insert)
+import Control.Concurrent.STM.TChan
 
 data NewGame = NewGame { track :: Text
                        , numPlayers :: Int
@@ -38,9 +39,11 @@ postNewGameR = do
             case mtrack of
                 Nothing -> return ()
                 Just track -> do
+                    chan <- atomically newBroadcastTChan
                     let game = Game { gameTrack = track
                                     , gameNumPlayers = numPlayers g
                                     , gamePlayers = []
+                                    , gameChannel = chan
                                     }
                     games <- appGames <$> getYesod
                     gameId <- liftIO mkGameId

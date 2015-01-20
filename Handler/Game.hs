@@ -1,6 +1,6 @@
 module Handler.Game where
 
-import Import
+import Import hiding (readChan, writeChan)
 
 import Data.Aeson (encode)
 import Yesod.WebSockets
@@ -8,10 +8,10 @@ import Yesod.WebSockets
 getGameR :: GameId -> Handler Html
 getGameR gid = do
     games <- appGames <$> getYesod >>= liftIO . readIORef
-    webSockets gameApp
     case lookup gid games of
         Nothing -> notFound
         Just game -> do
+            webSockets $ gameApp gid game
             let trackData = decodeUtf8 $ toStrict $ encode (gameTrack game)
             defaultLayout $ do
                 setTitleI MsgDotRace
@@ -22,9 +22,13 @@ getGameR gid = do
                 $(fayFile "GameScreen")
 
 
-gameApp :: WebSocketsT Handler ()
-gameApp =
-    forever $ do
-        text <- receiveData
-        liftIO $ print (text :: Text)
-        sendTextData ("Welcome to dot-race " <> text)
+gameApp :: GameId -> Game -> WebSocketsT Handler ()
+gameApp _gid game = do
+    -- TODO: handle creating new user
+    let writeChan = gameChannel game
+    readChan <- atomically $ do
+        -- TODO: send join message to write chan
+        dupTChan writeChan
+    race_
+        (forever $ atomically (readTChan readChan) >>= sendTextData)
+        (sourceWS $$ mapM_C (atomically . writeTChan writeChan))
