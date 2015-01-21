@@ -12,7 +12,7 @@ type Player = Text
 
 data Game = Game { gameTrack :: Track
                  , gameNumPlayers :: Int
-                 , gamePlayers :: [Player]
+                 , gamePlayers :: TMVar [Player]
                  , gameChannel :: TChan Text
                  }
 

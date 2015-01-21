@@ -40,6 +40,10 @@ data Extremes = Extremes { eXMin :: Double
                          , eYMax :: Double
                          }
 
+data Command = Join Text    -- ^Player name
+             | Joined Text  -- ^Player name
+             | Move Point
+
 #ifndef FAY
 instance FromJSON Point where
     parseJSON (Object o) = P <$> o .: "x" <*> o .: "y"
@@ -69,16 +73,14 @@ instance ToJSON Track where
                                  , "trackStartPos" .= trackStartPos
                                  , "instance" .= ("Track" :: String)
                                  ]
+
+deriving instance Show Command
 #endif
 
-data Command = Join Text    -- ^Player name
-             | Joined Text  -- ^Player name
-             | Move Point
-
 serializeCommand :: Command -> Text
-serializeCommand (Join name)   = "join\t" <> name
-serializeCommand (Joined name) = "joined\t" <> name
-serializeCommand (Move p)      = "move\t" <> tshow (_x p) <> "\t" <> tshow (_y p)
+serializeCommand (Join name)   = fromString "join\t" <> name
+serializeCommand (Joined name) = fromString "joined\t" <> name
+serializeCommand (Move p)      = fromString "move\t" <> tshow (_x p) <> "\t" <> tshow (_y p)
 
 deserializeCommand :: Text -> Maybe Command
 deserializeCommand t = case splitOn "\t" t of

@@ -206,8 +206,9 @@ initGame _ = do
 
     joinButton <- selectId "joinButton"
     addEvent joinButton "click" $ \_ -> do
+        name <- getPlayerName
+        (sendText conn . serializeCommand . Join) name
         selectId "join-game-dialog" >>= hide
-        sendText conn "Hello"
 
     return ()
 

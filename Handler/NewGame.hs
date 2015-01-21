@@ -39,9 +39,10 @@ postNewGameR = do
                 Nothing -> return ()
                 Just track -> do
                     chan <- atomically newBroadcastTChan
+                    players <- atomically $ newTMVar []
                     let game = Game { gameTrack = track
                                     , gameNumPlayers = numPlayers g
-                                    , gamePlayers = []
+                                    , gamePlayers = players
                                     , gameChannel = chan
                                     }
                     games <- appGames <$> getYesod

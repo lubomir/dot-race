@@ -1,3 +1,4 @@
+{-# LANGUAGE RecordWildCards #-}
 module Handler.Game where
 
 import Import hiding (readChan, writeChan)
@@ -23,12 +24,25 @@ getGameR gid = do
 
 
 gameApp :: GameId -> Game -> WebSocketsT Handler ()
-gameApp _gid game = do
-    -- TODO: handle creating new user
-    let writeChan = gameChannel game
-    readChan <- atomically $ do
-        -- TODO: send join message to write chan
-        dupTChan writeChan
+gameApp _gid Game{..} = do
+    cmd <- receiveData
+    liftIO $ print cmd
+    liftIO $ print $ deserializeCommand cmd
+    (readChan, players) <- case deserializeCommand cmd of
+        Just (Join name) -> atomically $ do
+            -- TODO handle full game
+            modifyTMVar gamePlayers (flip (++) [name])
+            players <- readTMVar gamePlayers
+            writeTChan gameChannel (serializeCommand (Joined name))
+            c <- dupTChan gameChannel
+            return (c, players)
+        _ -> invalidArgs ["Expected Join command"]
+    liftIO $ print players
+    mapM_ (sendTextData . serializeCommand . Joined) players
     race_
         (forever $ atomically (readTChan readChan) >>= sendTextData)
-        (sourceWS $$ mapM_C (atomically . writeTChan writeChan))
+        (sourceWS $$ mapM_C (atomically . writeTChan gameChannel))
+
+-- This is wrong!
+modifyTMVar :: TMVar a -> (a -> a) -> STM ()
+modifyTMVar var f = readTMVar var >>= putTMVar var . f
