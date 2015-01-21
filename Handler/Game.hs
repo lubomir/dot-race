@@ -43,6 +43,5 @@ gameApp _gid Game{..} = do
         (forever $ atomically (readTChan readChan) >>= sendTextData)
         (sourceWS $$ mapM_C (atomically . writeTChan gameChannel))
 
--- This is wrong!
 modifyTMVar :: TMVar a -> (a -> a) -> STM ()
-modifyTMVar var f = readTMVar var >>= putTMVar var . f
+modifyTMVar var f = takeTMVar var >>= putTMVar var . f
