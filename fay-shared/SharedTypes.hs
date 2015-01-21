@@ -4,12 +4,17 @@
 {-# LANGUAGE StandaloneDeriving #-}
 module SharedTypes where
 
-import Prelude
 
 #ifndef FAY
+import ClassyPrelude
 import Data.Aeson
-import Control.Applicative
-import Data.Monoid
+import Data.Text
+#else
+import Prelude
+import FFI
+import Data.Maybe
+import Data.Text hiding (splitOn)
+import qualified Data.Text as T
 #endif
 
 
@@ -64,4 +69,34 @@ instance ToJSON Track where
                                  , "trackStartPos" .= trackStartPos
                                  , "instance" .= ("Track" :: String)
                                  ]
+#endif
+
+data Command = Join Text    -- ^Player name
+             | Joined Text  -- ^Player name
+             | Move Point
+
+serializeCommand :: Command -> Text
+serializeCommand (Join name)   = "join\t" <> name
+serializeCommand (Joined name) = "joined\t" <> name
+serializeCommand (Move p)      = "move\t" <> tshow (_x p) <> "\t" <> tshow (_y p)
+
+deserializeCommand :: Text -> Maybe Command
+deserializeCommand t = case splitOn "\t" t of
+    ["join", name]   -> Just $ Join name
+    ["joined", name] -> Just $ Joined name
+    ["move", x, y]   -> do
+        x' <- readMay x
+        y' <- readMay y
+        Just (Move (P x' y'))
+    _ -> Nothing
+
+#ifdef FAY
+tshow :: Double -> Text
+tshow = ffi "'' + %1"
+
+splitOn :: Text -> Text -> [Text]
+splitOn p t = T.splitOn (T.head p) t
+
+readMay :: Text -> Maybe Double
+readMay = ffi "%1['match'](/\\d+/) ? null : parseInt(%1, 10)"
 #endif
