@@ -1,17 +1,14 @@
 module DotRace.Game where
 
-import qualified Network.WebSockets as WS
-
 import ClassyPrelude
 import System.Random
 import Text.Printf
-import Control.Concurrent.STM.TChan
 
 import SharedTypes
 
 type GameId = Text
 
-type Player = (Text, WS.Connection)
+type Player = Text
 
 data Game = Game { gameTrack :: Track
                  , gameNumPlayers :: Int

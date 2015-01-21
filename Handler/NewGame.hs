@@ -4,7 +4,6 @@ import Import
 
 import Yesod.Form.Bootstrap3
 import Data.Map (keys, insert)
-import Control.Concurrent.STM.TChan
 
 data NewGame = NewGame { track :: Text
                        , numPlayers :: Int
