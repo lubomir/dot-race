@@ -13,6 +13,7 @@ $newline never
         <meta name="author" content="">
 
         <meta name="viewport" content="width=device-width,initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
 
         ^{pageHead pc}
 
@@ -25,6 +26,9 @@ $newline never
     <body>
         ^{pageBody pc}
 
+        <script src="//code.jquery.com/jquery-1.11.2.min.js">
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/svg.js/1.0.1/svg.min.js">
         $maybe analytics <- appAnalytics $ appSettings master
             <script>
               if(!window.location.href.match(/localhost/)){
