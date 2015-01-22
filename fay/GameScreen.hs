@@ -135,13 +135,18 @@ refreshOptions drawing TrackData{..} trace@(tp:_) = do
                     in not (ln `intersectsWithAnyBounded` innerSegments) &&
                        not (ln `intersectsWithAnyBounded` outerSegments)
 
+data PlayerTrace = PlayerTrace { ptPath :: [Point]
+                               , ptExtents :: Extremes
+                               }
+
 initGame :: Event -> Fay ()
 initGame _ = do
     td@TrackData{..} <- makeTrackData `fmap` (readTrackData >>= parseTrackData)
 
     zoom <- newVar initialZoom
-    playerTrace <- newVar [startPos !! 1]
-    playerExtents <- newVar (Extremes (eXMax outerExtents) 0 (eYMax outerExtents) 0)
+    playerTrace <- newVar (PlayerTrace [startPos !! 1]
+                                       (Extremes (eXMax outerExtents) 0 (eYMax outerExtents) 0)
+                          )
     drawing <- initSVG drawingId
     canvas <- selectId drawingId
     options <- newVar []
@@ -155,8 +160,8 @@ initGame _ = do
                 drawing
         draw td drawing
         trace <- get playerTrace
-        drawMove drawing trace
-        refreshOptions drawing td trace >>= set options
+        drawMove drawing $ ptPath trace
+        refreshOptions drawing td (ptPath trace) >>= set options
         svgScale z z drawing
 
     addEvent canvas "mousemove" $ \event -> do
@@ -176,14 +181,12 @@ initGame _ = do
         (x, y) <- getPosition z canvas event
         opts <- get options
         when (P x y `elem` opts) $ do
-            modify playerTrace (P x y:)
-            modify playerExtents (updateExtremes (P x y))
-            reached <- get playerExtents
+            modify playerTrace (addPoint (P x y))
             trace <- get playerTrace
-            when (encapsulates innerExtents reached && hasWinningMove trace startLine) $ do
+            when (encapsulates innerExtents (ptExtents trace) && hasWinningMove (ptPath trace) startLine) $ do
                 print "You won"
-            drawMove drawing trace
-            refreshOptions drawing td trace >>= set options
+            drawMove drawing (ptPath trace)
+            refreshOptions drawing td (ptPath trace) >>= set options
             return ()
 
     zoomInBtn <- selectId "zoom-in"
@@ -211,6 +214,9 @@ initGame _ = do
         selectId "join-game-dialog" >>= hide
 
     return ()
+
+addPoint :: Point -> PlayerTrace -> PlayerTrace
+addPoint p (PlayerTrace ps ex) = PlayerTrace (p:ps) (updateExtremes p ex)
 
 updateExtremes :: Point -> Extremes -> Extremes
 updateExtremes (P x y) ex = Extremes { eXMin = min x (eXMin ex)
