@@ -240,3 +240,25 @@ zoomOut now = if now > minZoom then now - zoomIncrement else now
 main :: Fay ()
 main = do
     addWindowEvent "load" initGame
+{-
+ - TODO
+ -
+ - on loading page, display join dialog
+ - on join submit
+ -  * wait for welcome message, store player number
+ -  * until game is full, wait for join
+ -    + on each join, add one dummy trace to list of players
+ -
+ - when game is full, draw track, set current player to 1
+ -
+ - on player change
+ -  if current player is local player
+ -    wait for click
+ -    send command
+ -  else
+ -    wait for command
+ -  update trace
+ -  if game won or crash
+ -    display appropriate message and end game
+ -  update current player
+ -}
