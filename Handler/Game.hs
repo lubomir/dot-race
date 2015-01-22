@@ -44,6 +44,7 @@ gameApp _gid Game{..} = do
         GameFull -> sendTextData ("Game is full already." :: Text)
         InvalidCommand -> sendTextData ("Expected JOIN command." :: Text)
         JoinOk readChan players -> do
+            (sendTextData . serializeCommand . Welcome) (length players)
             mapM_ (sendTextData . serializeCommand . Joined) players
             race_
                 (forever $ atomically (readTChan readChan) >>= sendTextData)

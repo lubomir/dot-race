@@ -43,6 +43,7 @@ data Extremes = Extremes { eXMin :: Double
 data Command = Join Text    -- ^Player name
              | Joined Text  -- ^Player name
              | Move Point
+             | Welcome Int  -- ^Player number
 
 #ifndef FAY
 instance FromJSON Point where
@@ -81,6 +82,7 @@ serializeCommand :: Command -> Text
 serializeCommand (Join name)   = fromString "join\t" <> name
 serializeCommand (Joined name) = fromString "joined\t" <> name
 serializeCommand (Move p)      = fromString "move\t" <> tshow (_x p) <> "\t" <> tshow (_y p)
+serializeCommand (Welcome i)   = fromString "welcome\t" <> tshowI i
 
 deserializeCommand :: Text -> Maybe Command
 deserializeCommand t = case splitOn "\t" t of
@@ -90,15 +92,30 @@ deserializeCommand t = case splitOn "\t" t of
         x' <- readMay x
         y' <- readMay y
         Just (Move (P x' y'))
+    ["welcome", i]   -> do
+        i' <- readMayI i
+        Just (Welcome i')
     _ -> Nothing
 
 #ifdef FAY
 tshow :: Double -> Text
 tshow = ffi "'' + %1"
 
+tshowI :: Int -> Text
+tshowI = ffi "'' + %1"
+
 splitOn :: Text -> Text -> [Text]
 splitOn p t = T.splitOn (T.head p) t
 
 readMay :: Text -> Maybe Double
 readMay = ffi "%1['match'](/\\d+/) ? null : parseInt(%1, 10)"
+
+readMayI :: Text -> Maybe Int
+readMayI = ffi "%1['match'](/\\d+/) ? null : parseInt(%1, 10)"
+#else
+readMayI :: Text -> Maybe Int
+readMayI = readMay
+
+tshowI :: Int -> Text
+tshowI = tshow
 #endif
