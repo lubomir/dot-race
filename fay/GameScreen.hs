@@ -175,8 +175,6 @@ initGame _ = do
             else setXY (-10) (-10) pointer
 
     addEvent canvas "click" $ \event -> do
-        sendText conn "click"
-        print "click"
         z <- get zoom
         (x, y) <- getPosition z canvas event
         opts <- get options
@@ -202,9 +200,7 @@ initGame _ = do
                 drawing
 
     conn `onMessage` \e -> do
-        print "onMessage"
         t <- getText e
-        print t
         addChatMessage t
 
     joinButton <- selectId "joinButton"
