@@ -26,8 +26,6 @@ getGameR gid = do
 gameApp :: GameId -> Game -> WebSocketsT Handler ()
 gameApp _gid Game{..} = do
     cmd <- receiveData
-    liftIO $ print cmd
-    liftIO $ print $ deserializeCommand cmd
     (readChan, players) <- case deserializeCommand cmd of
         Just (Join name) -> atomically $ do
             -- TODO handle full game
@@ -37,7 +35,6 @@ gameApp _gid Game{..} = do
             c <- dupTChan gameChannel
             return (c, players)
         _ -> invalidArgs ["Expected Join command"]
-    liftIO $ print players
     mapM_ (sendTextData . serializeCommand . Joined) players
     race_
         (forever $ atomically (readTChan readChan) >>= sendTextData)
