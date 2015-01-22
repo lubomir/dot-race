@@ -22,23 +22,39 @@ getGameR gid = do
                 $(widgetFile "game-screen")
                 $(fayFile "GameScreen")
 
+data JoinResult = GameFull
+                | JoinOk (TChan Text) [Player]
+                | InvalidCommand
+                deriving (Eq)
 
 gameApp :: GameId -> Game -> WebSocketsT Handler ()
 gameApp _gid Game{..} = do
     cmd <- receiveData
-    (readChan, players) <- case deserializeCommand cmd of
+    res <- case deserializeCommand cmd of
         Just (Join name) -> atomically $ do
-            -- TODO handle full game
-            modifyTMVar gamePlayers (flip (++) [name])
-            players <- readTMVar gamePlayers
-            writeTChan gameChannel (serializeCommand (Joined name))
-            c <- dupTChan gameChannel
-            return (c, players)
-        _ -> invalidArgs ["Expected Join command"]
-    mapM_ (sendTextData . serializeCommand . Joined) players
-    race_
-        (forever $ atomically (readTChan readChan) >>= sendTextData)
-        (sourceWS $$ mapM_C (atomically . writeTChan gameChannel))
+            mplayers <- readMayAdd gameNumPlayers name gamePlayers
+            case mplayers of
+                Nothing -> return GameFull
+                Just players -> do
+                    writeTChan gameChannel (serializeCommand (Joined name))
+                    c <- dupTChan gameChannel
+                    return (JoinOk c players)
+        _ -> return InvalidCommand
+    case res of
+        GameFull -> sendTextData ("Game is full already." :: Text)
+        InvalidCommand -> sendTextData ("Expected JOIN command." :: Text)
+        JoinOk readChan players -> do
+            mapM_ (sendTextData . serializeCommand . Joined) players
+            race_
+                (forever $ atomically (readTChan readChan) >>= sendTextData)
+                (sourceWS $$ mapM_C (atomically . writeTChan gameChannel))
 
-modifyTMVar :: TMVar a -> (a -> a) -> STM ()
-modifyTMVar var f = takeTMVar var >>= putTMVar var . f
+readMayAdd :: Int -> a -> TMVar [a] -> STM (Maybe [a])
+readMayAdd maxLen x var = do
+    xs <- readTMVar var
+    if length xs >= maxLen
+        then return Nothing
+        else do let xs' = xs ++ [x]
+                _ <- takeTMVar var
+                putTMVar var xs'
+                return (Just xs')
