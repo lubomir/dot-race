@@ -10,13 +10,24 @@ body
     background-color: #f5f5f5
     border-left: 1px solid #eee
 
+#chat
+    position: relative
+    margin: 0 -15px 0 -15px
+    padding: 0 0 72px 0
+    height: 100%
+
 #chat textarea
     position: absolute
-    bottom: 12px
-    left: 12px
-    right: 12px
+    bottom: 6px
+    left: 6px
     border: 1px solid #ccc
     resize: none
+    height: 60px
+
+#chat div
+    overflow: auto
+    padding: 6px
+    height: 100%
 
 #thisPlayerName
     font-weight: bold

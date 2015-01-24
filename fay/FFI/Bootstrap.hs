@@ -51,6 +51,10 @@ displayChatMsg i name msg = do
     displayChatMsgRaw $ fromString "<p><span class='player-" <> showInt i
                       <> fromString "'>" <> name <> fromString "</span>: "
                       <> msg <> fromString "</p>"
+    scrollChat
 
 displayChatMsgRaw :: Text -> Fay ()
 displayChatMsgRaw = ffi "$('#chat div').append(%1)"
+
+scrollChat :: Fay ()
+scrollChat = ffi "$('#chat div').stop().animate({scrollTop: $('#chat div')[0].scrollHeight}, 800)"
