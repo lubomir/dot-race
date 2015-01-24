@@ -120,15 +120,16 @@ removeOptions = selectClass "option" >>= mapM_ svgRemove
 -- |Compute and redraw options. Returns the list of options or empty list on
 -- crash.
 --
-refreshOptions :: Element -> TrackData -> [Point] -> Fay [Point]
-refreshOptions drawing TrackData{..} trace@(tp:_) = do
+refreshOptions :: GameState -> Element -> TrackData -> [Point] -> Fay [Point]
+refreshOptions GameState{..} drawing TrackData{..} trace@(tp:_) = do
     let opts = filter isValid $ getNeighbors $ getNextPoint trace
     if null opts
         then drawCrash drawing tp >> showCrashDialog
         else mapM_ (drawOpt drawing) opts
     return opts
   where
-    isValid p = (p /= tp) && not90Deg p && notThruWall p
+    isValid p = isEmpty p && not90Deg p && notThruWall p
+    isEmpty p = all ((/= p) . head . ptPath) gsTraces
 
     not90Deg p = case trace of
         (_:tp':_) -> distance p tp' >= 2
@@ -250,7 +251,7 @@ initGame _ = do
 
                 drawMove drawing n (ptPath curTrace)
                 when (isReady s && thisIsCurrentPlayer s) $
-                    refreshOptions drawing td (ptPath curTrace) >>= set options
+                    refreshOptions s drawing td (ptPath curTrace) >>= set options
 
             Just (Welcome n) -> do
                 modify state (setThisPlayer n)
@@ -266,7 +267,7 @@ initGame _ = do
                 s <- get state
                 when (thisIsCurrentPlayer s) $ do
                     let curTrace = getCurrentTrace s
-                    refreshOptions drawing td (ptPath curTrace) >>= set options
+                    refreshOptions s drawing td (ptPath curTrace) >>= set options
 
             x -> print "ERROR" >> print t >> print x
 
