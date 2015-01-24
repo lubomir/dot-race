@@ -254,12 +254,17 @@ initGame _ = do
                 let curTrace = getNthTrace s n
 
                 drawMove drawing n (ptPath curTrace)
-                when (isReady s && gsThisPlayer s == 1) $
-                    refreshOptions s drawing td (ptPath (getCurrentTrace s)) >>= set options
+                when (isReady s) $ do
+                    if gsThisPlayer s == 1
+                        then do
+                            displayGameStatus "Choosing next move…"
+                            refreshOptions s drawing td (ptPath (getCurrentTrace s)) >>= set options
+                        else displayWaitingFor (gsPlayerNames s !! 0) 1
 
             Just (Welcome n) -> do
                 modify state (setThisPlayer n)
                 displayThisPlayerNum n
+                displayGameStatus "Waiting for players to join…"
 
             Just (Move p) -> do
                 modify state (moveCurrentPlayer p)
@@ -267,16 +272,20 @@ initGame _ = do
                 let trace = getCurrentTrace s
                 drawMove drawing (gsCurrentPlayer s) (ptPath trace)
                 if hasWon innerExtents startLine trace
-                    then
+                    then do
                         if thisIsCurrentPlayer s
                             then showWinDialog
                             else showLoseDialog (getCurrentPlayerName s)
+                        displayGameStatus "Game over"
                     else do
                         modify state nextPlayer
                         s <- get state
                         when (thisIsCurrentPlayer s) $ do
                             let curTrace = getCurrentTrace s
                             refreshOptions s drawing td (ptPath curTrace) >>= set options
+                        if gsCurrentPlayer s == gsThisPlayer s
+                            then displayGameStatus "Choosing next move…"
+                            else displayWaitingFor (getCurrentPlayerName s) (gsCurrentPlayer s)
 
             x -> print "ERROR" >> print t >> print x
 

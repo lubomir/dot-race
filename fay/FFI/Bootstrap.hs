@@ -1,6 +1,6 @@
 module FFI.Bootstrap where
 
-import Data.Text (Text, fromString)
+import Data.Text (Text, fromString, (<>), showInt)
 import FFI
 
 showDialog :: Text -> Fay ()
@@ -33,3 +33,11 @@ displayThisPlayerName = ffi "$('#thisPlayerName').text(%1)"
 
 displayThisPlayerNum :: Int -> Fay ()
 displayThisPlayerNum = ffi "$('#thisPlayerName').addClass('player-'+%1)"
+
+displayGameStatus :: Text -> Fay ()
+displayGameStatus = ffi "$('#gameStatus').html(%1)"
+
+displayWaitingFor :: Text -> Int -> Fay ()
+displayWaitingFor n i =
+    displayGameStatus $ fromString "Waiting for <span class='player-"
+                     <> showInt i <> fromString "'>" <> n <> fromString "</span>…"

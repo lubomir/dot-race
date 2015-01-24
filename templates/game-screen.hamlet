@@ -8,6 +8,8 @@
         <div>
             <p .navbar-text>
                 <span #thisPlayerName>
+            <p .navbar-text>
+                <span #gameStatus>
             <ul .nav .navbar-nav .navbar-right>
                 <li>
                     <div .btn-group>

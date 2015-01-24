@@ -20,6 +20,10 @@ body
 
 #thisPlayerName
     font-weight: bold
+    font-size: 110%
+
+#gameStatus span
+    font-weight: bold
 
 #chat div span
     font-weight: bold
