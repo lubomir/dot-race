@@ -54,3 +54,25 @@
                     <b>
                         Boom!
                     You crashed!
+
+<div .modal .fade #win-dialog role=dialog tabindex=-1>
+    <div .modal-dialog>
+        <div .modal-content>
+            <div .modal-header>
+                <h4 .modal-title>
+                    Congratulations!
+            <div .modal-body>
+                <p>
+                    You won the race!
+
+<div .modal .fade #lose-dialog role=dialog tabindex=-1>
+    <div .modal-dialog>
+        <div .modal-content>
+            <div .modal-header>
+                <h4 .modal-title>
+                    Game over!
+            <div .modal-body>
+                <p>
+                    You lose!
+                    <b #winner>
+                    won the race.

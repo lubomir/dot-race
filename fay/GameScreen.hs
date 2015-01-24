@@ -172,6 +172,9 @@ thisIsCurrentPlayer s = gsThisPlayer s == gsCurrentPlayer s
 getCurrentTrace :: GameState -> PlayerTrace
 getCurrentTrace s = gsTraces s !! (gsCurrentPlayer s - 1)
 
+getCurrentPlayerName :: GameState -> Text
+getCurrentPlayerName s = gsPlayerNames s !! (gsCurrentPlayer s - 1)
+
 getNthTrace :: GameState -> Int -> PlayerTrace
 getNthTrace s n = gsTraces s !! (n - 1)
 
@@ -261,14 +264,18 @@ initGame _ = do
                 modify state (moveCurrentPlayer p)
                 s <- get state
                 let trace = getCurrentTrace s
-                when (encapsulates innerExtents (ptExtents trace) && hasWinningMove (ptPath trace) startLine) $ do
-                    print "Game was won"
                 drawMove drawing (gsCurrentPlayer s) (ptPath trace)
-                modify state nextPlayer
-                s <- get state
-                when (thisIsCurrentPlayer s) $ do
-                    let curTrace = getCurrentTrace s
-                    refreshOptions s drawing td (ptPath curTrace) >>= set options
+                if (hasWon innerExtents startLine trace)
+                    then
+                        if thisIsCurrentPlayer s
+                            then showWinDialog
+                            else showLoseDialog (getCurrentPlayerName s)
+                    else do
+                        modify state nextPlayer
+                        s <- get state
+                        when (thisIsCurrentPlayer s) $ do
+                            let curTrace = getCurrentTrace s
+                            refreshOptions s drawing td (ptPath curTrace) >>= set options
 
             x -> print "ERROR" >> print t >> print x
 
@@ -279,6 +286,10 @@ initGame _ = do
         selectId "join-game-dialog" >>= hide
 
     return ()
+
+hasWon :: Extremes -> Line -> PlayerTrace -> Bool
+hasWon insides startLine PlayerTrace{..} =
+    encapsulates insides ptExtents && hasWinningMove ptPath startLine
 
 addPoint :: Point -> PlayerTrace -> PlayerTrace
 addPoint p (PlayerTrace ps ex) = PlayerTrace (p:ps) (updateExtremes p ex)
@@ -311,14 +322,6 @@ main = do
     addWindowEvent "load" initGame
 {-
  - TODO
- -
- - on loading page, display join dialog
- - on join submit
- -  * wait for welcome message, store player number
- -  * until game is full, wait for join
- -    + on each join, add one dummy trace to list of players
- -
- - when game is full, draw track, set current player to 1
  -
  - on player change
  -  if current player is local player
