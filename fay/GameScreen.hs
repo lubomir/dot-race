@@ -319,19 +319,4 @@ zoomOut :: Double -> Double
 zoomOut now = if now > minZoom then now - zoomIncrement else now
 
 main :: Fay ()
-main = do
-    addWindowEvent "load" initGame
-{-
- - TODO
- -
- - on player change
- -  if current player is local player
- -    wait for click
- -    send command
- -  else
- -    wait for command
- -  update trace
- -  if game won or crash
- -    display appropriate message and end game
- -  update current player
- -}
+main = addWindowEvent "load" initGame
