@@ -3,17 +3,17 @@ module Handler.NewGame where
 import Import
 
 import Yesod.Form.Bootstrap3
-import Data.Map (keys, insert)
+import Data.Map (assocs, insert)
 
-data NewGame = NewGame { track :: Text
+data NewGame = NewGame { track :: Track
                        , numPlayers :: Int
                        }
 
 
-getTrackOptions :: Handler (OptionList Text)
-getTrackOptions = mkOptionList . map mkOption . keys . appTracks <$> getYesod
+getTrackOptions :: Handler (OptionList Track)
+getTrackOptions = mkOptionList . map mkOption . assocs . appTracks <$> getYesod
   where
-    mkOption t = Option t t t
+    mkOption (n, t) = Option n t (n <> ":" <> tshow (length $ trackStartPos t))
 
 newGameForm :: Form NewGame
 newGameForm = renderBootstrap3 BootstrapBasicForm $ NewGame
@@ -27,6 +27,7 @@ getNewGameR = do
     (widget, enctype) <- generateFormPost newGameForm
     defaultLayout $ do
         setTitleI MsgNewGame
+        $(fayFile "NewGame")
         $(widgetFile "new-game")
 
 postNewGameR :: Handler Html
@@ -34,21 +35,17 @@ postNewGameR = do
     ((res, widget), enctype) <- runFormPost newGameForm
     case res of
         FormSuccess g -> do
-            mtrack <- lookup (track g) . appTracks <$> getYesod
-            case mtrack of
-                Nothing -> return ()
-                Just track -> do
-                    chan <- atomically newBroadcastTChan
-                    players <- atomically $ newTMVar []
-                    let game = Game { gameTrack = track
-                                    , gameNumPlayers = numPlayers g
-                                    , gamePlayers = players
-                                    , gameChannel = chan
-                                    }
-                    games <- appGames <$> getYesod
-                    gameId <- liftIO mkGameId
-                    atomicModifyIORef' games (\m -> (insert gameId game m, ()))
-                    redirect (GameR gameId)
+            chan <- atomically newBroadcastTChan
+            players <- atomically $ newTMVar []
+            let game = Game { gameTrack = track g
+                            , gameNumPlayers = numPlayers g
+                            , gamePlayers = players
+                            , gameChannel = chan
+                            }
+            games <- appGames <$> getYesod
+            gameId <- liftIO mkGameId
+            atomicModifyIORef' games (\m -> (insert gameId game m, ()))
+            redirect (GameR gameId)
         _ -> return ()
     defaultLayout $ do
             setTitleI MsgNewGame

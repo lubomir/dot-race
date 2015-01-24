@@ -44,6 +44,23 @@ data Command = Join Text    -- ^Player name
              | Welcome Int  -- ^Player number
              | Chat Int Text -- ^Player number, message
 
+-- |Check if two numbers are almost equal with precision of 99.99 %.
+--
+-- This function is specialized to Double, but would work with any type
+-- satisfying `(Ord a, Fractional a)`.
+--
+-- prop> \x -> almostEqual x (1.000001 * x)
+-- prop> \x -> x /= 0.0 ==> not (almostEqual x (1.001 * x))
+--
+almostEqual :: Double -> Double -> Bool
+almostEqual a b
+  | a == b    = True
+  | otherwise = let relativeError = abs ((a - b) / if abs b > abs a then b else a)
+                in relativeError <= 0.0001
+
+instance Eq Point where
+    (P x1 y1) == (P x2 y2) = almostEqual x1 x2 && almostEqual y1 y2
+
 #ifndef FAY
 deriving instance Show Point
 
@@ -59,6 +76,7 @@ instance ToJSON Point where
                             ]
 
 deriving instance Show Track
+deriving instance Eq Track
 
 instance FromJSON Track where
     parseJSON = withObject "Track" $ \o -> do

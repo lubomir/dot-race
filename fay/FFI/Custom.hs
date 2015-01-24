@@ -1,10 +1,10 @@
 module FFI.Custom where
 
 import FFI
-import Data.Text (Text)
+import Data.Text (Text, showInt)
 
 import FFI.Types
-import SharedTypes (Track)
+import SharedTypes (Track, readI)
 
 readTrackData :: Fay Text
 readTrackData = ffi "$('#track')['val']()"
@@ -73,7 +73,27 @@ eventKey :: Event -> Int
 eventKey = ffi "%1['keyCode']"
 
 getChatMessage :: Fay Text
-getChatMessage = ffi "$('#chatInput').val()"
+getChatMessage = ffi "$('#chatInput')['val']()"
 
 clearChatMessage :: Fay ()
-clearChatMessage = ffi "$('#chatInput').val('')"
+clearChatMessage = ffi "$('#chatInput')['val']('')"
+
+getSelectedValue :: Element -> Fay Text
+getSelectedValue = ffi "%1['options'][%1['selectedIndex']].value"
+
+setMaxLimit :: Element -> Int -> Fay ()
+setMaxLimit el m = do
+    setMax el m
+    cur <- getValue el
+    print "current"
+    print cur
+    when (readI cur > m) (setValue el m)
+
+setMax :: Element -> Int -> Fay ()
+setMax = ffi "%1['setAttribute']('max', %2)"
+
+getValue :: Element -> Fay Text
+getValue = ffi "%1['value']"
+
+setValue :: Element -> Int -> Fay ()
+setValue = ffi "%1['value'] = %2"
