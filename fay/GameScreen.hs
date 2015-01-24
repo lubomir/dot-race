@@ -139,14 +139,21 @@ data PlayerTrace = PlayerTrace { ptPath :: [Point]
                                , ptExtents :: Extremes
                                }
 
+initPlayerTrace :: Point -> PlayerTrace
+initPlayerTrace p@(P x y) = PlayerTrace [p] (Extremes x x y y)
+
+data GameState = GameState { gsTraces :: [PlayerTrace]
+                           , gsNumPlayers :: Int
+                           , gsCurrentPlayer :: Int
+                           , gsThisPlayer :: Int
+                           }
+
 initGame :: Event -> Fay ()
 initGame _ = do
     td@TrackData{..} <- makeTrackData `fmap` (readTrackData >>= parseTrackData)
 
     zoom <- newVar initialZoom
-    playerTrace <- newVar (PlayerTrace [startPos !! 1]
-                                       (Extremes (eXMax outerExtents) 0 (eYMax outerExtents) 0)
-                          )
+    playerTrace <- newVar (initPlayerTrace (startPos !! 1))
     drawing <- initSVG drawingId
     canvas <- selectId drawingId
     options <- newVar []
