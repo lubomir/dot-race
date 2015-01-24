@@ -87,16 +87,13 @@ serializeCommand (Welcome i)   = fromString "welcome\t" <> tshowI i
 
 deserializeCommand :: Text -> Maybe Command
 deserializeCommand t = go $ splitOn (fromString "\t") t
-  where go [cmd, arg] =
-            if cmd == fromString "join"
-                then Just (Join arg)
-            else if cmd == fromString "welcome"
-                then Just (Welcome (readI arg))
-            else Nothing
-        go [cmd, arg1, arg2] =
-            if cmd == fromString "move"
-                then Just (Move (P (read arg1) (read arg2)))
-            else Nothing
+  where go [cmd, arg]
+          | cmd == fromString "join"    = Just (Join arg)
+          | cmd == fromString "welcome" = Just (Welcome (readI arg))
+          | otherwise =  Nothing
+        go [cmd, arg1, arg2]
+          | cmd == fromString "move" = Just (Move (P (read arg1) (read arg2)))
+          | otherwise = Nothing
         go _ = Nothing
 
 #ifdef FAY
