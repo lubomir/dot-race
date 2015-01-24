@@ -251,8 +251,8 @@ initGame _ = do
                 let curTrace = getNthTrace s n
 
                 drawMove drawing n (ptPath curTrace)
-                when (isReady s && thisIsCurrentPlayer s) $
-                    refreshOptions s drawing td (ptPath curTrace) >>= set options
+                when (isReady s && gsThisPlayer s == 1) $
+                    refreshOptions s drawing td (ptPath (getCurrentTrace s)) >>= set options
 
             Just (Welcome n) -> do
                 modify state (setThisPlayer n)
