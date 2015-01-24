@@ -305,6 +305,8 @@ initGame _ = do
             (sendText conn . serializeCommand . Join) name
             selectId "join-game-dialog" >>= hide
 
+    selectId "inputName" >>= focusElement
+
     chatInput <- selectId "chatInput"
     addEvent chatInput "keydown" $ \e -> do
         when (eventKey e == 13) $ do

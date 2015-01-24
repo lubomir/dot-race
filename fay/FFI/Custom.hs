@@ -97,3 +97,6 @@ getValue = ffi "%1['value']"
 
 setValue :: Element -> Int -> Fay ()
 setValue = ffi "%1['value'] = %2"
+
+focusElement :: Element -> Fay ()
+focusElement = ffi "%1['focus']()"
