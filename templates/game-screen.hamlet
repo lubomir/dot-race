@@ -6,6 +6,8 @@
         <div .navbar-header>
             <a .navbar-brand href="/">Dot Race
         <div>
+            <p .navbar-text>
+                <span #thisPlayerName>
             <ul .nav .navbar-nav .navbar-right>
                 <li>
                     <div .btn-group>

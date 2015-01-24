@@ -257,8 +257,9 @@ initGame _ = do
                 when (isReady s && gsThisPlayer s == 1) $
                     refreshOptions s drawing td (ptPath (getCurrentTrace s)) >>= set options
 
-            Just (Welcome n) ->
+            Just (Welcome n) -> do
                 modify state (setThisPlayer n)
+                displayThisPlayerNum n
 
             Just (Move p) -> do
                 modify state (moveCurrentPlayer p)
@@ -283,6 +284,7 @@ initGame _ = do
     addEvent joinForm "submit" $ \e -> do
         preventDefault e
         name <- getPlayerName
+        displayThisPlayerName name
         (sendText conn . serializeCommand . Join) name
         selectId "join-game-dialog" >>= hide
 

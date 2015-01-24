@@ -27,3 +27,9 @@ showLoseDialog winner = setWinner winner >> showDialog (fromString "lose-dialog"
 
 setWinner :: Text -> Fay ()
 setWinner = ffi "$('#winner')['text'](%1)"
+
+displayThisPlayerName :: Text -> Fay ()
+displayThisPlayerName = ffi "$('#thisPlayerName').text(%1)"
+
+displayThisPlayerNum :: Int -> Fay ()
+displayThisPlayerNum = ffi "$('#thisPlayerName').addClass('player-'+%1)"

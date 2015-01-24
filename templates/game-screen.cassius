@@ -18,6 +18,9 @@ body
     border: 1px solid #ccc
     resize: none
 
+#thisPlayerName
+    font-weight: bold
+
 #chat div span
     font-weight: bold
 
