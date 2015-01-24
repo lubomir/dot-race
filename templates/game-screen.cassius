@@ -18,6 +18,45 @@ body
     border: 1px solid #ccc
     resize: none
 
+#chat div span
+    font-weight: bold
+
+.player-1
+    color: #f00
+    stroke: #f00
+.tick.player-1
+    fill: #f00
+
+.player-2
+    color: #00f
+    stroke: #00f
+.tick.player-2
+    fill: #0f0
+
+.player-3
+    color: #0f0
+    stroke: #0f0
+.tick.player-3
+    fill: #00f
+
+.player-4
+    color: #f0f
+    stroke: #f0f
+.tick.player-4
+    fill: #f0f
+
+.player-5
+    color: #0ff
+    stroke: #0ff
+.tick.player-5
+    fill: #0ff
+
+.player-6
+    color: #ff0
+    stroke: #ff0
+.tick.player-6
+    fill: #ff0
+
 .main
     position: fixed
     top: 51px
@@ -49,10 +88,6 @@ body
 .trace
     fill: none
     stroke-width: 0.1
-    stroke: #f00
-
-.tick
-    fill: #f00
 
 .pointer
     fill: rgba(0, 255, 0, 0.8)

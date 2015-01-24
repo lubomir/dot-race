@@ -1,4 +1,5 @@
 <input type="hidden" id="track" value="#{trackData}">
+<input type="hidden" id="numPlayers" value="#{gameNumPlayers game}">
 
 <div .navbar .navbar-fixed-top .navbar-inverse>
     <div .container-fluid>

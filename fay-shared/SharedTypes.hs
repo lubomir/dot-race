@@ -41,7 +41,6 @@ data Extremes = Extremes { eXMin :: Double
                          }
 
 data Command = Join Text    -- ^Player name
-             | Joined Text  -- ^Player name
              | Move Point
              | Welcome Int  -- ^Player number
 
@@ -82,7 +81,6 @@ deriving instance Show Command
 
 serializeCommand :: Command -> Text
 serializeCommand (Join name)   = fromString "join\t" <> name
-serializeCommand (Joined name) = fromString "joined\t" <> name
 serializeCommand (Move p)      = fromString "move\t" <> tshow (_x p)
                                                      <> fromString "\t"
                                                      <> tshow (_y p)
@@ -93,8 +91,6 @@ deserializeCommand t = go $ splitOn (fromString "\t") t
   where go [cmd, arg] =
             if cmd == fromString "join"
                 then Just (Join arg)
-            else if cmd == fromString "joined"
-                then Just (Joined arg)
             else if cmd == fromString "welcome"
                 then do i <- readMayI arg
                         Just (Welcome i)
@@ -117,11 +113,14 @@ tshowI = ffi "'' + %1"
 splitOn :: Text -> Text -> [Text]
 splitOn p t = T.splitOn (T.head p) t
 
+-- |Intentionally use parseInt as this function is only used for moves that are
+-- on integer coordinates only.
+--
 readMay :: Text -> Maybe Double
-readMay = ffi "%1['match'](/\\d+/) ? null : parseInt(%1, 10)"
+readMay = ffi "parseInt(%1, 10)"
 
 readMayI :: Text -> Maybe Int
-readMayI = ffi "%1['match'](/\\d+/) ? null : parseInt(%1, 10)"
+readMayI = ffi "parseInt(%1, 10)"
 #else
 readMayI :: Text -> Maybe Int
 readMayI = readMay

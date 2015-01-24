@@ -143,14 +143,30 @@ initPlayerTrace :: Point -> PlayerTrace
 initPlayerTrace p@(P x y) = PlayerTrace [p] (Extremes x x y y)
 
 data GameState = GameState { gsTraces :: [PlayerTrace]
+                           , gsPlayerNames :: [Text]
                            , gsNumPlayers :: Int
                            , gsCurrentPlayer :: Int
                            , gsThisPlayer :: Int
                            }
 
+addPlayer :: Text -> [Point] -> GameState -> GameState
+addPlayer n starts s@(GameState ts ps _ _ _) =
+    let num = length ts
+    in s { gsTraces = ts ++ [initPlayerTrace (starts !! num)]
+         , gsPlayerNames = ps ++ [n]
+         }
+
+setThisPlayer :: Int -> GameState -> GameState
+setThisPlayer n s = s { gsThisPlayer = n }
+
+isReady :: GameState -> Bool
+isReady GameState{..} = length gsTraces == gsNumPlayers
+
 initGame :: Event -> Fay ()
 initGame _ = do
     td@TrackData{..} <- makeTrackData `fmap` (readTrackData >>= parseTrackData)
+    numPlayers <- getNumPlayers
+    state <- newVar (GameState [] [] numPlayers 0 0)
 
     zoom <- newVar initialZoom
     playerTrace <- newVar (initPlayerTrace (startPos !! 1))
@@ -166,9 +182,6 @@ initGame _ = do
                 (z * (eYMax outerExtents + canvasPadding))
                 drawing
         draw td drawing
-        trace <- get playerTrace
-        drawMove drawing $ ptPath trace
-        refreshOptions drawing td (ptPath trace) >>= set options
         svgScale z z drawing
 
     addEvent canvas "mousemove" $ \event -> do
@@ -208,7 +221,17 @@ initGame _ = do
 
     conn `onMessage` \e -> do
         t <- getText e
-        addChatMessage t
+        case deserializeCommand t of
+            Nothing -> print $ "Failed decoding message: " T.<> t
+            Just (Join name) -> do
+                modify state (addPlayer name startPos)
+                s <- get state
+                print s
+                let n = length (gsPlayerNames s)
+                displayPlayerJoin n name
+            Just (Welcome n) -> do
+                modify state (setThisPlayer n)
+            x -> print "ERROR" >> print t >> print x
 
     joinButton <- selectId "joinButton"
     addEvent joinButton "click" $ \_ -> do

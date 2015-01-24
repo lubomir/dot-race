@@ -33,7 +33,7 @@ gameApp _gid Game{..} = do
             case mplayers of
                 Nothing -> return GameFull
                 Just players -> do
-                    writeTChan gameChannel (serializeCommand (Joined name))
+                    writeTChan gameChannel (serializeCommand (Join name))
                     c <- dupTChan gameChannel
                     return (JoinOk c players)
         _ -> return InvalidCommand
@@ -42,7 +42,7 @@ gameApp _gid Game{..} = do
         InvalidCommand -> sendTextData ("Expected JOIN command." :: Text)
         JoinOk readChan players -> do
             (sendTextData . serializeCommand . Welcome) (length players)
-            mapM_ (sendTextData . serializeCommand . Joined) players
+            mapM_ (sendTextData . serializeCommand . Join) players
             race_
                 (forever $ atomically (readTChan readChan) >>= sendTextData)
                 (sourceWS $$ mapM_C (atomically . writeTChan gameChannel))
