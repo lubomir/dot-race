@@ -3,7 +3,7 @@ module GameScreen where
 
 import Prelude
 import FFI
-import Data.Text (Text, fromString)
+import Data.Text (Text, fromString, (<>), showInt)
 import qualified Data.Text as T
 import Data.Var
 import Data.Function (fmap)
@@ -74,11 +74,12 @@ draw td@(TrackData{..}) drawing = do
     _ <- svgPolygon drawing outer >>= setClass "outline"
     return ()
 
-drawMove :: Element -> [Point] -> Fay ()
-drawMove drawing pts = do
-    svgLine drawing x1 y1 x2 y2 >>= setClass "trace"
+drawMove :: Element -> Int -> [Point] -> Fay ()
+drawMove drawing i pts = do
+    let cls = "player-" <> showInt i
+    svgLine drawing x1 y1 x2 y2 >>= setClass ("trace " <> cls)
     svgCircle drawing tickRadius
-        >>= setClass "tick"
+        >>= setClass ("tick " <> cls)
         >>= setXY (x2 - tickRadius / 2) (y2 - tickRadius / 2)
     return ()
   where
@@ -162,14 +163,28 @@ setThisPlayer n s = s { gsThisPlayer = n }
 isReady :: GameState -> Bool
 isReady GameState{..} = length gsTraces == gsNumPlayers
 
+thisIsCurrentPlayer :: GameState -> Bool
+thisIsCurrentPlayer s = gsThisPlayer s == gsCurrentPlayer s
+
+getCurrentTrace :: GameState -> PlayerTrace
+getCurrentTrace s = gsTraces s !! (gsCurrentPlayer s - 1)
+
+setIx :: Int -> a -> [a] -> [a]
+setIx 1 x (_:ys) = x:ys
+setIx n x (y:ys) = y : setIx (n-1) x ys
+
+moveCurrentPlayer :: Point -> GameState -> GameState
+moveCurrentPlayer p s =
+    let trace = getCurrentTrace s
+    in s { gsTraces = setIx (gsCurrentPlayer s) (addPoint p trace) (gsTraces s) }
+
 initGame :: Event -> Fay ()
 initGame _ = do
     td@TrackData{..} <- makeTrackData `fmap` (readTrackData >>= parseTrackData)
     numPlayers <- getNumPlayers
-    state <- newVar (GameState [] [] numPlayers 0 0)
+    state <- newVar (GameState [] [] numPlayers 1 0)
 
     zoom <- newVar initialZoom
-    playerTrace <- newVar (initPlayerTrace (startPos !! 1))
     drawing <- initSVG drawingId
     canvas <- selectId drawingId
     options <- newVar []
@@ -199,11 +214,12 @@ initGame _ = do
         (x, y) <- getPosition z canvas event
         opts <- get options
         when (P x y `elem` opts) $ do
-            modify playerTrace (addPoint (P x y))
-            trace <- get playerTrace
+            modify state (moveCurrentPlayer (P x y))
+            s <- get state
+            let trace = getCurrentTrace s
             when (encapsulates innerExtents (ptExtents trace) && hasWinningMove (ptPath trace) startLine) $ do
                 print "You won"
-            drawMove drawing (ptPath trace)
+            drawMove drawing (gsCurrentPlayer s) (ptPath trace)
             refreshOptions drawing td (ptPath trace) >>= set options
             return ()
 
@@ -226,9 +242,12 @@ initGame _ = do
             Just (Join name) -> do
                 modify state (addPlayer name startPos)
                 s <- get state
-                print s
                 let n = length (gsPlayerNames s)
                 displayPlayerJoin n name
+                when (isReady s && thisIsCurrentPlayer s) $ do
+                    let curTrace = getCurrentTrace s
+                    drawMove drawing (gsCurrentPlayer s) (ptPath curTrace)
+                    refreshOptions drawing td (ptPath curTrace) >>= set options
             Just (Welcome n) -> do
                 modify state (setThisPlayer n)
             x -> print "ERROR" >> print t >> print x

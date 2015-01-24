@@ -10,7 +10,7 @@ getPlayerName :: Fay Text
 getPlayerName = ffi "$('#inputName')['val']()"
 
 getNumPlayers :: Fay Int
-getNumPlayers = ffi "$('#numPlayers')['val']()"
+getNumPlayers = ffi "parseInt($('#numPlayers')['val'](), 10)"
 
 displayPlayerJoin :: Int -> Text -> Fay ()
 displayPlayerJoin =

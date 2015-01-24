@@ -23,36 +23,42 @@ body
 
 .player-1
     color: #f00
+.trace.player-1
     stroke: #f00
 .tick.player-1
     fill: #f00
 
 .player-2
     color: #00f
+.trace.player-2
     stroke: #00f
 .tick.player-2
     fill: #0f0
 
 .player-3
     color: #0f0
+.trace.player-3
     stroke: #0f0
 .tick.player-3
     fill: #00f
 
 .player-4
     color: #f0f
+.trace.player-4
     stroke: #f0f
 .tick.player-4
     fill: #f0f
 
 .player-5
     color: #0ff
+.trace.player-5
     stroke: #0ff
 .tick.player-5
     fill: #0ff
 
 .player-6
     color: #ff0
+.trace.player-6
     stroke: #ff0
 .tick.player-6
     fill: #ff0
