@@ -33,14 +33,14 @@ body
 .trace.player-2
     stroke: #00f
 .tick.player-2
-    fill: #0f0
+    fill: #00f
 
 .player-3
     color: #0f0
 .trace.player-3
     stroke: #0f0
 .tick.player-3
-    fill: #00f
+    fill: #0f0
 
 .player-4
     color: #f0f

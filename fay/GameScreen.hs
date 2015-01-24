@@ -114,12 +114,14 @@ drawOpt drawing (P x y) = do
   where
     offset = optionRadius / 2
 
+removeOptions :: Fay ()
+removeOptions = selectClass "option" >>= mapM_ svgRemove
+
 -- |Compute and redraw options. Returns the list of options or empty list on
 -- crash.
 --
 refreshOptions :: Element -> TrackData -> [Point] -> Fay [Point]
 refreshOptions drawing TrackData{..} trace@(tp:_) = do
-    selectClass "option" >>= mapM_ svgRemove
     let opts = filter isValid $ getNeighbors $ getNextPoint trace
     if null opts
         then drawCrash drawing tp >> showCrashDialog
@@ -169,6 +171,9 @@ thisIsCurrentPlayer s = gsThisPlayer s == gsCurrentPlayer s
 getCurrentTrace :: GameState -> PlayerTrace
 getCurrentTrace s = gsTraces s !! (gsCurrentPlayer s - 1)
 
+getNthTrace :: GameState -> Int -> PlayerTrace
+getNthTrace s n = gsTraces s !! (n - 1)
+
 setIx :: Int -> a -> [a] -> [a]
 setIx 1 x (_:ys) = x:ys
 setIx n x (y:ys) = y : setIx (n-1) x ys
@@ -177,6 +182,9 @@ moveCurrentPlayer :: Point -> GameState -> GameState
 moveCurrentPlayer p s =
     let trace = getCurrentTrace s
     in s { gsTraces = setIx (gsCurrentPlayer s) (addPoint p trace) (gsTraces s) }
+
+nextPlayer :: GameState -> GameState
+nextPlayer s = s { gsCurrentPlayer = gsCurrentPlayer s `mod` gsNumPlayers s + 1 }
 
 initGame :: Event -> Fay ()
 initGame _ = do
@@ -214,14 +222,8 @@ initGame _ = do
         (x, y) <- getPosition z canvas event
         opts <- get options
         when (P x y `elem` opts) $ do
-            modify state (moveCurrentPlayer (P x y))
-            s <- get state
-            let trace = getCurrentTrace s
-            when (encapsulates innerExtents (ptExtents trace) && hasWinningMove (ptPath trace) startLine) $ do
-                print "You won"
-            drawMove drawing (gsCurrentPlayer s) (ptPath trace)
-            refreshOptions drawing td (ptPath trace) >>= set options
-            return ()
+            (sendText conn . serializeCommand . Move) (P x y)
+            removeOptions
 
     zoomInBtn <- selectId "zoom-in"
     addEvent zoomInBtn "click" $ \_ -> modify zoom zoomIn
@@ -244,12 +246,28 @@ initGame _ = do
                 s <- get state
                 let n = length (gsPlayerNames s)
                 displayPlayerJoin n name
-                when (isReady s && thisIsCurrentPlayer s) $ do
-                    let curTrace = getCurrentTrace s
-                    drawMove drawing (gsCurrentPlayer s) (ptPath curTrace)
+                let curTrace = getNthTrace s n
+
+                drawMove drawing n (ptPath curTrace)
+                when (isReady s && thisIsCurrentPlayer s) $
                     refreshOptions drawing td (ptPath curTrace) >>= set options
+
             Just (Welcome n) -> do
                 modify state (setThisPlayer n)
+
+            Just (Move p) -> do
+                modify state (moveCurrentPlayer p)
+                s <- get state
+                let trace = getCurrentTrace s
+                when (encapsulates innerExtents (ptExtents trace) && hasWinningMove (ptPath trace) startLine) $ do
+                    print "Game was won"
+                drawMove drawing (gsCurrentPlayer s) (ptPath trace)
+                modify state nextPlayer
+                s <- get state
+                when (thisIsCurrentPlayer s) $ do
+                    let curTrace = getCurrentTrace s
+                    refreshOptions drawing td (ptPath curTrace) >>= set options
+
             x -> print "ERROR" >> print t >> print x
 
     joinButton <- selectId "joinButton"
