@@ -13,14 +13,14 @@ import Data.Text
 import Prelude
 import FFI
 import Data.Maybe
-import Data.Text hiding (splitOn)
+import Data.Text (Text, fromString, (<>))
 import qualified Data.Text as T
 #endif
 
 
 data Point = P { _x :: Double
                , _y :: Double
-               } deriving (Show)
+               }
 
 data Line = Line Point Point
 
@@ -46,6 +46,8 @@ data Command = Join Text    -- ^Player name
              | Welcome Int  -- ^Player number
 
 #ifndef FAY
+deriving instance Show Point
+
 instance FromJSON Point where
     parseJSON (Object o) = P <$> o .: "x" <*> o .: "y"
     parseJSON arr@(Array _) = uncurry P <$> parseJSON arr
@@ -81,21 +83,29 @@ deriving instance Show Command
 serializeCommand :: Command -> Text
 serializeCommand (Join name)   = fromString "join\t" <> name
 serializeCommand (Joined name) = fromString "joined\t" <> name
-serializeCommand (Move p)      = fromString "move\t" <> tshow (_x p) <> "\t" <> tshow (_y p)
+serializeCommand (Move p)      = fromString "move\t" <> tshow (_x p)
+                                                     <> fromString "\t"
+                                                     <> tshow (_y p)
 serializeCommand (Welcome i)   = fromString "welcome\t" <> tshowI i
 
 deserializeCommand :: Text -> Maybe Command
-deserializeCommand t = case splitOn "\t" t of
-    ["join", name]   -> Just $ Join name
-    ["joined", name] -> Just $ Joined name
-    ["move", x, y]   -> do
-        x' <- readMay x
-        y' <- readMay y
-        Just (Move (P x' y'))
-    ["welcome", i]   -> do
-        i' <- readMayI i
-        Just (Welcome i')
-    _ -> Nothing
+deserializeCommand t = go $ splitOn (fromString "\t") t
+  where go [cmd, arg] =
+            if cmd == fromString "join"
+                then Just (Join arg)
+            else if cmd == fromString "joined"
+                then Just (Joined arg)
+            else if cmd == fromString "welcome"
+                then do i <- readMayI arg
+                        Just (Welcome i)
+            else Nothing
+        go [cmd, arg1, arg2] =
+            if cmd == fromString "move"
+                then do x <- readMay arg1
+                        y <- readMay arg2
+                        Just (Move (P x y))
+            else Nothing
+        go _ = Nothing
 
 #ifdef FAY
 tshow :: Double -> Text
