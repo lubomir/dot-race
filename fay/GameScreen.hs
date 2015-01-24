@@ -300,9 +300,10 @@ initGame _ = do
     addEvent joinForm "submit" $ \e -> do
         preventDefault e
         name <- getPlayerName
-        displayThisPlayerName name
-        (sendText conn . serializeCommand . Join) name
-        selectId "join-game-dialog" >>= hide
+        when (T.length name > 0) $ do
+            displayThisPlayerName name
+            (sendText conn . serializeCommand . Join) name
+            selectId "join-game-dialog" >>= hide
 
     chatInput <- selectId "chatInput"
     addEvent chatInput "keydown" $ \e -> do
