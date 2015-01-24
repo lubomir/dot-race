@@ -35,17 +35,19 @@ postNewGameR = do
     ((res, widget), enctype) <- runFormPost newGameForm
     case res of
         FormSuccess g -> do
-            chan <- atomically newBroadcastTChan
-            players <- atomically $ newTMVar []
-            let game = Game { gameTrack = track g
-                            , gameNumPlayers = numPlayers g
-                            , gamePlayers = players
-                            , gameChannel = chan
-                            }
-            games <- appGames <$> getYesod
-            gameId <- liftIO mkGameId
-            atomicModifyIORef' games (\m -> (insert gameId game m, ()))
-            redirect (GameR gameId)
+            when (numPlayers g <= length (trackStartPos (track g))) $ do
+                chan <- atomically newBroadcastTChan
+                players <- atomically $ newTMVar []
+                let game = Game { gameTrack = track g
+                                , gameNumPlayers = numPlayers g
+                                , gamePlayers = players
+                                , gameChannel = chan
+                                }
+                games <- appGames <$> getYesod
+                gameId <- liftIO mkGameId
+                atomicModifyIORef' games (\m -> (insert gameId game m, ()))
+                redirect (GameR gameId)
+            setMessage "Too many players"
         _ -> return ()
     defaultLayout $ do
             setTitleI MsgNewGame

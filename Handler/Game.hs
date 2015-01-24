@@ -12,12 +12,18 @@ getGameR gid = do
     case lookup gid games of
         Nothing -> notFound
         Just game -> do
-            webSockets $ gameApp gid game
-            let trackData = decodeUtf8 $ toStrict $ encode (gameTrack game)
-            defaultLayout $ do
-                setTitleI MsgDotRace
-                $(widgetFile "game-screen")
-                $(fayFile "GameScreen")
+            currentPlayers <- atomically $ readTMVar (gamePlayers game)
+            if length currentPlayers >= gameNumPlayers game
+                then do
+                    setMessage "Game is full already."
+                    redirect NewGameR
+                else do
+                    webSockets $ gameApp gid game
+                    let trackData = decodeUtf8 $ toStrict $ encode (gameTrack game)
+                    defaultLayout $ do
+                        setTitleI MsgDotRace
+                        $(widgetFile "game-screen")
+                        $(fayFile "GameScreen")
 
 data JoinResult = GameFull
                 | JoinOk (TChan Text) [Player]
