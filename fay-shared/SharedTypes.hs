@@ -92,14 +92,11 @@ deserializeCommand t = go $ splitOn (fromString "\t") t
             if cmd == fromString "join"
                 then Just (Join arg)
             else if cmd == fromString "welcome"
-                then do i <- readMayI arg
-                        Just (Welcome i)
+                then Just (Welcome (readI arg))
             else Nothing
         go [cmd, arg1, arg2] =
             if cmd == fromString "move"
-                then do x <- readMay arg1
-                        y <- readMay arg2
-                        Just (Move (P x y))
+                then Just (Move (P (read arg1) (read arg2)))
             else Nothing
         go _ = Nothing
 
@@ -113,17 +110,18 @@ tshowI = ffi "'' + %1"
 splitOn :: Text -> Text -> [Text]
 splitOn p t = T.splitOn (T.head p) t
 
--- |Intentionally use parseInt as this function is only used for moves that are
--- on integer coordinates only.
---
-readMay :: Text -> Maybe Double
-readMay = ffi "parseInt(%1, 10)"
+read :: Text -> Double
+read = ffi "parseInt(%1, 10)"
 
-readMayI :: Text -> Maybe Int
-readMayI = ffi "parseInt(%1, 10)"
+readI :: Text -> Int
+readI = ffi "parseInt(%1, 10)"
 #else
-readMayI :: Text -> Maybe Int
-readMayI = readMay
+read, readI :: Read a => Text -> a
+read val = case readMay val of
+    Nothing -> error "Expected something else"
+    Just x -> x
+
+readI = read
 
 tshowI :: Int -> Text
 tshowI = tshow
