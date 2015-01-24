@@ -172,8 +172,11 @@ thisIsCurrentPlayer s = gsThisPlayer s == gsCurrentPlayer s
 getCurrentTrace :: GameState -> PlayerTrace
 getCurrentTrace s = gsTraces s !! (gsCurrentPlayer s - 1)
 
+getNthPlayerName :: GameState -> Int -> Text
+getNthPlayerName s i = gsPlayerNames s !! (i - 1)
+
 getCurrentPlayerName :: GameState -> Text
-getCurrentPlayerName s = gsPlayerNames s !! (gsCurrentPlayer s - 1)
+getCurrentPlayerName s = getNthPlayerName s (gsCurrentPlayer s)
 
 getNthTrace :: GameState -> Int -> PlayerTrace
 getNthTrace s n = gsTraces s !! (n - 1)
@@ -287,6 +290,10 @@ initGame _ = do
                             then displayGameStatus "Choosing next move…"
                             else displayWaitingFor (getCurrentPlayerName s) (gsCurrentPlayer s)
 
+            Just (Chat pId msg) -> do
+                s <- get state
+                displayChatMsg pId (getNthPlayerName s pId) msg
+
             x -> print "ERROR" >> print t >> print x
 
     joinForm <- selectId "joinForm"
@@ -296,6 +303,15 @@ initGame _ = do
         displayThisPlayerName name
         (sendText conn . serializeCommand . Join) name
         selectId "join-game-dialog" >>= hide
+
+    chatInput <- selectId "chatInput"
+    addEvent chatInput "keydown" $ \e -> do
+        when (eventKey e == 13) $ do
+            preventDefault e
+            s <- get state
+            msg <- getChatMessage
+            (sendText conn . serializeCommand) (Chat (gsThisPlayer s) msg)
+            clearChatMessage
 
     return ()
 

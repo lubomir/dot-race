@@ -16,8 +16,12 @@ getNumPlayers :: Fay Int
 getNumPlayers = ffi "parseInt($('#numPlayers')['val'](), 10)"
 
 displayPlayerJoin :: Int -> Text -> Fay ()
-displayPlayerJoin =
-    ffi "$('#chat div').append('<p><span class=player-'+%1+'>'+%2+'</span> has joined.</p>')"
+displayPlayerJoin i name =
+    displaySystemMsg (fromString "<span class='player-" <> showInt i
+                   <> fromString"'>" <> name <> fromString "</span> has joined.")
+
+displaySystemMsg :: Text -> Fay ()
+displaySystemMsg = displayChatMsg 0 (fromString "System")
 
 showWinDialog :: Fay ()
 showWinDialog = showDialog (fromString "win-dialog")
@@ -41,3 +45,12 @@ displayWaitingFor :: Text -> Int -> Fay ()
 displayWaitingFor n i =
     displayGameStatus $ fromString "Waiting for <span class='player-"
                      <> showInt i <> fromString "'>" <> n <> fromString "</span>…"
+
+displayChatMsg :: Int -> Text -> Text -> Fay ()
+displayChatMsg i name msg = do
+    displayChatMsgRaw $ fromString "<p><span class='player-" <> showInt i
+                      <> fromString "'>" <> name <> fromString "</span>: "
+                      <> msg <> fromString "</p>"
+
+displayChatMsgRaw :: Text -> Fay ()
+displayChatMsgRaw = ffi "$('#chat div').append(%1)"

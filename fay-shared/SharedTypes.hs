@@ -42,6 +42,7 @@ data Extremes = Extremes { eXMin :: Double
 data Command = Join Text    -- ^Player name
              | Move Point
              | Welcome Int  -- ^Player number
+             | Chat Int Text -- ^Player number, message
 
 #ifndef FAY
 deriving instance Show Point
@@ -84,6 +85,7 @@ serializeCommand (Move p)      = fromString "move\t" <> tshow (_x p)
                                                      <> fromString "\t"
                                                      <> tshow (_y p)
 serializeCommand (Welcome i)   = fromString "welcome\t" <> tshowI i
+serializeCommand (Chat i msg)  = fromString "chat\t" <> tshowI i <> fromString "\t" <> msg
 
 deserializeCommand :: Text -> Maybe Command
 deserializeCommand t = go $ splitOn (fromString "\t") t
@@ -93,6 +95,7 @@ deserializeCommand t = go $ splitOn (fromString "\t") t
           | otherwise =  Nothing
         go [cmd, arg1, arg2]
           | cmd == fromString "move" = Just (Move (P (read arg1) (read arg2)))
+          | cmd == fromString "chat" = Just (Chat (readI arg1) arg2)
           | otherwise = Nothing
         go _ = Nothing
 

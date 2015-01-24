@@ -28,7 +28,7 @@
         <div .col-md-2 .sidebar>
             <div #chat>
                 <div>
-                <textarea>
+                <textarea #chatInput>
 
 <div .modal .show #join-game-dialog role=dialog tabindex=-1>
     <div .modal-dialog>

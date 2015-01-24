@@ -68,3 +68,12 @@ addChatMessage = ffi "$('#chat div').append('<p>'+%1+'</p>')"
 
 preventDefault :: Event -> Fay ()
 preventDefault = ffi "%1['preventDefault']()"
+
+eventKey :: Event -> Int
+eventKey = ffi "%1['keyCode']"
+
+getChatMessage :: Fay Text
+getChatMessage = ffi "$('#chatInput').val()"
+
+clearChatMessage :: Fay ()
+clearChatMessage = ffi "$('#chatInput').val('')"
