@@ -225,6 +225,7 @@ initGame _ = do
         when (P x y `elem` opts) $ do
             (sendText conn . serializeCommand . Move) (P x y)
             removeOptions
+            set options []
 
     zoomInBtn <- selectId "zoom-in"
     addEvent zoomInBtn "click" $ \_ -> modify zoom zoomIn
