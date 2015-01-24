@@ -257,7 +257,7 @@ initGame _ = do
                 when (isReady s && gsThisPlayer s == 1) $
                     refreshOptions s drawing td (ptPath (getCurrentTrace s)) >>= set options
 
-            Just (Welcome n) -> do
+            Just (Welcome n) ->
                 modify state (setThisPlayer n)
 
             Just (Move p) -> do
@@ -265,7 +265,7 @@ initGame _ = do
                 s <- get state
                 let trace = getCurrentTrace s
                 drawMove drawing (gsCurrentPlayer s) (ptPath trace)
-                if (hasWon innerExtents startLine trace)
+                if hasWon innerExtents startLine trace
                     then
                         if thisIsCurrentPlayer s
                             then showWinDialog

@@ -113,10 +113,7 @@ readI :: Text -> Int
 readI = ffi "parseInt(%1, 10)"
 #else
 read, readI :: Read a => Text -> a
-read val = case readMay val of
-    Nothing -> error "Expected something else"
-    Just x -> x
-
+read val = fromMaybe (error "Expected something else") (readMay val)
 readI = read
 
 tshowI :: Int -> Text
