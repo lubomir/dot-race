@@ -28,20 +28,20 @@
 
 <div .modal .show #join-game-dialog role=dialog tabindex=-1>
     <div .modal-dialog>
-        <div .modal-content>
-            <div .modal-header>
-                <h4 .modal-title>
-                    Join game
-            <div .modal-body>
-                <form .form-horizontal>
+        <form .form-horizontal #joinForm>
+            <div .modal-content>
+                <div .modal-header>
+                    <h4 .modal-title>
+                        Join game
+                <div .modal-body>
                     <div .form-group>
                         <label .col-sm-2 .control-label for="inputName">
                             Name
                         <div .col-sm-10>
                             <input type=text .form-control #inputName>
-            <div .modal-footer>
-                <button type="button" .btn .btn-primary #joinButton>
-                    Join
+                <div .modal-footer>
+                    <button type="submit" .btn .btn-primary>
+                        Join
 
 <div .modal .fade #crash-dialog role=dialog tabindex=-1>
     <div .modal-dialog>

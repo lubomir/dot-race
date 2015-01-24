@@ -65,3 +65,6 @@ sendText = ffi "%1['send'](%2)"
 
 addChatMessage :: Text -> Fay ()
 addChatMessage = ffi "$('#chat div').append('<p>'+%1+'</p>')"
+
+preventDefault :: Event -> Fay ()
+preventDefault = ffi "%1['preventDefault']()"

@@ -279,8 +279,9 @@ initGame _ = do
 
             x -> print "ERROR" >> print t >> print x
 
-    joinButton <- selectId "joinButton"
-    addEvent joinButton "click" $ \_ -> do
+    joinForm <- selectId "joinForm"
+    addEvent joinForm "submit" $ \e -> do
+        preventDefault e
         name <- getPlayerName
         (sendText conn . serializeCommand . Join) name
         selectId "join-game-dialog" >>= hide
