@@ -52,24 +52,20 @@ gameApp gid Game{..} = do
         JoinOk readChan name players -> do
             (sendTextData . serializeCommand . Welcome) (length players)
             mapM_ (sendTextData . serializeCommand . Join) players
-            handle (connectionClosed gameChannel gamePlayers name) $ do
+            handle connectionClosed $ do
                 race_
                     (forever $ atomically (readTChan readChan) >>= sendTextData)
                     (sourceWS $$ mapM_C (atomically . writeTChan gameChannel))
-            remaining <- atomically $ readTMVar gamePlayers
+            remaining <- atomically $ do
+                writeTChan gameChannel (serializeCommand (Quit name))
+                removeFromTMVar gamePlayers name
             when (null remaining) $ do
                 games <- appGames <$> getYesod
                 liftIO $ atomicModifyIORef' games (\m -> (M.delete gid m, ()))
   where
     send = sendTextData . serializeCommand
-    connectionClosed :: TChan Text
-                     -> TMVar [Player]
-                     -> Player
-                     -> ConnectionException
-                     -> WebSocketsT Handler ()
-    connectionClosed chan players name _ = atomically $ do
-        writeTChan chan (serializeCommand (Quit name))
-        remove players name
+    connectionClosed :: ConnectionException -> WebSocketsT Handler ()
+    connectionClosed _ = return ()
 
 -- |Read a TMVar containing a list. If the list is shorter than given limit,
 -- append a value to it, update the TMVar with it and return new list.
@@ -85,7 +81,9 @@ readMayAdd maxLen x var = do
                 putTMVar var xs'
                 return (Just xs')
 
-remove :: Eq a => TMVar [a] -> a -> STM ()
-remove var x = do
+removeFromTMVar :: Eq a => TMVar [a] -> a -> STM ([a])
+removeFromTMVar var x = do
     xs <- takeTMVar var
-    putTMVar var (delete x xs)
+    let res = delete x xs
+    putTMVar var res
+    return res
