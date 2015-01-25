@@ -1,10 +1,13 @@
 {-# LANGUAGE RecordWildCards #-}
 module Handler.Game where
 
-import Import hiding (readChan, writeChan)
+import Import hiding (readChan, writeChan, delete)
 
+import Data.List (delete)
 import Data.Aeson (encode)
 import Yesod.WebSockets
+import Network.WebSockets (ConnectionException)
+import qualified Data.Map.Strict as M
 
 getGameR :: GameId -> Handler Html
 getGameR gid = do
@@ -26,12 +29,12 @@ getGameR gid = do
                         $(fayFile "GameScreen")
 
 data JoinResult = GameFull
-                | JoinOk (TChan Text) [Player]
+                | JoinOk (TChan Text) Player [Player]
                 | InvalidCommand
                 deriving (Eq)
 
 gameApp :: GameId -> Game -> WebSocketsT Handler ()
-gameApp _gid Game{..} = do
+gameApp gid Game{..} = do
     cmd <- receiveData
     res <- case deserializeCommand cmd of
         Just (Join name) -> atomically $ do
@@ -41,19 +44,32 @@ gameApp _gid Game{..} = do
                 Just players -> do
                     writeTChan gameChannel (serializeCommand (Join name))
                     c <- dupTChan gameChannel
-                    return (JoinOk c players)
+                    return (JoinOk c name players)
         _ -> return InvalidCommand
     case res of
         GameFull -> send (System "Game is full already.")
         InvalidCommand -> send (System "Expected JOIN command.")
-        JoinOk readChan players -> do
+        JoinOk readChan name players -> do
             (sendTextData . serializeCommand . Welcome) (length players)
             mapM_ (sendTextData . serializeCommand . Join) players
-            race_
-                (forever $ atomically (readTChan readChan) >>= sendTextData)
-                (sourceWS $$ mapM_C (atomically . writeTChan gameChannel))
+            handle (connectionClosed gameChannel gamePlayers name) $ do
+                race_
+                    (forever $ atomically (readTChan readChan) >>= sendTextData)
+                    (sourceWS $$ mapM_C (atomically . writeTChan gameChannel))
+            remaining <- atomically $ readTMVar gamePlayers
+            when (null remaining) $ do
+                games <- appGames <$> getYesod
+                liftIO $ atomicModifyIORef' games (\m -> (M.delete gid m, ()))
   where
     send = sendTextData . serializeCommand
+    connectionClosed :: TChan Text
+                     -> TMVar [Player]
+                     -> Player
+                     -> ConnectionException
+                     -> WebSocketsT Handler ()
+    connectionClosed chan players name _ = atomically $ do
+        writeTChan chan (serializeCommand (Quit name))
+        remove players name
 
 -- |Read a TMVar containing a list. If the list is shorter than given limit,
 -- append a value to it, update the TMVar with it and return new list.
@@ -68,3 +84,8 @@ readMayAdd maxLen x var = do
                 _ <- takeTMVar var
                 putTMVar var xs'
                 return (Just xs')
+
+remove :: Eq a => TMVar [a] -> a -> STM ()
+remove var x = do
+    xs <- takeTMVar var
+    putTMVar var (delete x xs)

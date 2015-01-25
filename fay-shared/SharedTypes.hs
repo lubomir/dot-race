@@ -44,6 +44,7 @@ data Command = Join Text    -- ^Player name
              | Welcome Int  -- ^Player number
              | Chat Int Text -- ^Player number, message
              | System Text
+             | Quit Text    -- ^Player name
 
 -- |Check if two numbers are almost equal with precision of 99.99 %.
 --
@@ -100,6 +101,7 @@ deriving instance Show Command
 
 serializeCommand :: Command -> Text
 serializeCommand (Join name)   = fromString "join\t" <> name
+serializeCommand (Quit name)   = fromString "quit\t" <> name
 serializeCommand (Move p)      = fromString "move\t" <> tshow (_x p)
                                                      <> fromString "\t"
                                                      <> tshow (_y p)
@@ -111,6 +113,7 @@ deserializeCommand :: Text -> Maybe Command
 deserializeCommand t = go $ splitOn (fromString "\t") t
   where go [cmd, arg]
           | cmd == fromString "join"    = Just (Join arg)
+          | cmd == fromString "quit"    = Just (Quit arg)
           | cmd == fromString "welcome" = Just (Welcome (readI arg))
           | cmd == fromString "system"  = Just (System arg)
           | otherwise =  Nothing

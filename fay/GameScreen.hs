@@ -261,6 +261,11 @@ initGame _ = do
                             refreshOptions s drawing td (ptPath (getCurrentTrace s)) >>= set options
                         else displayWaitingFor (head (gsPlayerNames s)) 1
 
+            Just (Quit name) -> do
+                s <- get state
+                let n = length (gsPlayerNames s)
+                displayPlayerQuit n name
+
             Just (Welcome n) -> do
                 modify state (setThisPlayer n)
                 displayThisPlayerNum n

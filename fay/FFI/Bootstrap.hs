@@ -20,6 +20,11 @@ displayPlayerJoin i name =
     displaySystemMsg (fromString "<span class='player-" <> showInt i
                    <> fromString"'>" <> name <> fromString "</span> has joined.")
 
+displayPlayerQuit :: Int -> Text -> Fay ()
+displayPlayerQuit i name =
+    displaySystemMsg (fromString "<span class='player-" <> showInt i
+                   <> fromString"'>" <> name <> fromString "</span> has left.")
+
 displaySystemMsg :: Text -> Fay ()
 displaySystemMsg = displayChatMsg 0 (fromString "System")
 
