@@ -207,12 +207,14 @@ initGame _ = do
     setXY (-10) (-10) pointer
     conn <- getWSConnection
 
-    get zoom >>= \z -> do
+    _ <- subscribe zoom $ \z -> do
+        svgScale z z drawing
         svgSize (z * (eXMax outerExtents + canvasPadding))
                 (z * (eYMax outerExtents + canvasPadding))
                 drawing
-        draw td drawing
-        svgScale z z drawing
+
+    draw td drawing
+    set zoom initialZoom
 
     addEvent canvas "mousemove" $ \event -> do
         z <- get zoom
@@ -238,12 +240,6 @@ initGame _ = do
 
     zoomOutBtn <- selectId "zoom-out"
     addEvent zoomOutBtn "click" $ \_ -> modify zoom zoomOut
-
-    _ <- subscribe zoom $ \z -> do
-        svgScale z z drawing
-        svgSize (z * (eXMax outerExtents + canvasPadding))
-                (z * (eYMax outerExtents + canvasPadding))
-                drawing
 
     conn `onMessage` \e -> do
         t <- getText e
