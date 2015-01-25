@@ -12,7 +12,7 @@ import SharedTypes
 import Geometry
 import Constants
 import FFI.SVG
-import FFI.Custom
+import DotRace.FFI
 import FFI.Types
 
 data TrackData = TrackData { track     :: Track

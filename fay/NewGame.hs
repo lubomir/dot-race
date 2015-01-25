@@ -4,7 +4,7 @@ module NewGame where
 import Prelude
 import Data.Text (Text, fromString)
 
-import FFI.Custom
+import DotRace.FFI
 import FFI.Types
 import SharedTypes
 

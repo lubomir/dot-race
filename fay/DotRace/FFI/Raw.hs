@@ -1,10 +1,10 @@
-module FFI.Custom where
+module DotRace.FFI.Raw where
 
 import FFI
-import Data.Text (Text, showInt, fromString, (<>))
 
 import FFI.Types
 import SharedTypes (Track, readI)
+import Data.Text (Text)
 
 readTrackData :: Fay Text
 readTrackData = ffi "$('#track')['val']()"
@@ -36,17 +36,6 @@ rectLeft = ffi "%1['left']"
 rectTop = ffi "%1['top']"
 getScrollTop = ffi "%1['scrollTop']"
 getScrollLeft = ffi "%1['scrollLeft']"
-
-eventLocation :: Element -> Event -> Fay (Double, Double)
-eventLocation element ev = do
-    r <- getBoundingClientRect element
-    st <- getScrollTop element
-    sl <- getScrollLeft element
-    t <- rectTop r
-    l <- rectLeft r
-    x <- eventPageX ev
-    y <- eventPageY ev
-    return (x - l + sl, y - t + st)
 
 hide :: Element -> Fay ()
 hide = ffi "%1['remove']()"
@@ -84,12 +73,6 @@ clearChatMessage = ffi "$('#chatInput')['val']('')"
 getSelectedValue :: Element -> Fay Text
 getSelectedValue = ffi "%1['options'][%1['selectedIndex']].value"
 
-setMaxLimit :: Element -> Int -> Fay ()
-setMaxLimit el m = do
-    setMax el m
-    cur <- getValue el
-    when (readI cur > m) (setValue el m)
-
 setMax :: Element -> Int -> Fay ()
 setMax = ffi "%1['setAttribute']('max', %2)"
 
@@ -108,35 +91,11 @@ focusElement = ffi "%1['focus']()"
 showDialog :: Text -> Fay ()
 showDialog = ffi "$('#'+%1+'')['modal']()"
 
-showCrashDialog :: Fay ()
-showCrashDialog = showDialog (fromString "crashDialog")
-
 getPlayerName :: Fay Text
 getPlayerName = ffi "$('#inputName')['val']()"
 
 getNumPlayers :: Fay Int
 getNumPlayers = ffi "parseInt($('#numPlayers')['val'](), 10)"
-
-displayPlayerJoin :: Int -> Text -> Fay ()
-displayPlayerJoin = displayPlayerAction (fromString "joined")
-
-displayPlayerQuit :: Int -> Text -> Fay ()
-displayPlayerQuit = displayPlayerAction (fromString "left")
-
-displayPlayerAction :: Text -> Int -> Text -> Fay ()
-displayPlayerAction act i name =
-    displaySystemMsg (fromString "<span class='player-" <> showInt i
-                   <> fromString"'>" <> name <> fromString "</span> has " <> act
-                   <> fromString ".")
-
-displaySystemMsg :: Text -> Fay ()
-displaySystemMsg = displayChatMsg 0 (fromString "System")
-
-showWinDialog :: Fay ()
-showWinDialog = showDialog (fromString "win-dialog")
-
-showLoseDialog :: Text -> Fay ()
-showLoseDialog winner = setWinner winner >> showDialog (fromString "lose-dialog")
 
 setWinner :: Text -> Fay ()
 setWinner = ffi "$('#winner')['text'](%1)"
@@ -149,18 +108,6 @@ displayThisPlayerNum = ffi "$('#thisPlayerName').addClass('player-'+%1)"
 
 displayGameStatus :: Text -> Fay ()
 displayGameStatus = ffi "$('#gameStatus').html(%1)"
-
-displayWaitingFor :: Text -> Int -> Fay ()
-displayWaitingFor n i =
-    displayGameStatus $ fromString "Waiting for <span class='player-"
-                     <> showInt i <> fromString "'>" <> n <> fromString "</span>…"
-
-displayChatMsg :: Int -> Text -> Text -> Fay ()
-displayChatMsg i name msg = do
-    displayChatMsgRaw $ fromString "<p><span class='player-" <> showInt i
-                      <> fromString "'>" <> name <> fromString "</span>: "
-                      <> msg <> fromString "</p>"
-    scrollChat
 
 displayChatMsgRaw :: Text -> Fay ()
 displayChatMsgRaw = ffi "$('#chat div').append(%1)"
