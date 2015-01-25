@@ -44,14 +44,16 @@ gameApp _gid Game{..} = do
                     return (JoinOk c players)
         _ -> return InvalidCommand
     case res of
-        GameFull -> sendTextData ("Game is full already." :: Text)
-        InvalidCommand -> sendTextData ("Expected JOIN command." :: Text)
+        GameFull -> send (System "Game is full already.")
+        InvalidCommand -> send (System "Expected JOIN command.")
         JoinOk readChan players -> do
             (sendTextData . serializeCommand . Welcome) (length players)
             mapM_ (sendTextData . serializeCommand . Join) players
             race_
                 (forever $ atomically (readTChan readChan) >>= sendTextData)
                 (sourceWS $$ mapM_C (atomically . writeTChan gameChannel))
+  where
+    send = sendTextData . serializeCommand
 
 -- |Read a TMVar containing a list. If the list is shorter than given limit,
 -- append a value to it, update the TMVar with it and return new list.

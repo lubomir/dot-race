@@ -291,6 +291,8 @@ initGame _ = do
                 s <- get state
                 displayChatMsg pId (getNthPlayerName s pId) msg
 
+            Just (System msg) -> displaySystemMsg msg
+
             x -> print "ERROR" >> print t >> print x
 
     joinForm <- selectId "joinForm"
