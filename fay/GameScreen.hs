@@ -14,7 +14,6 @@ import Constants
 import FFI.SVG
 import FFI.Custom
 import FFI.Types
-import FFI.Bootstrap
 
 data TrackData = TrackData { track     :: Track
                            , outerExtents :: Extremes
