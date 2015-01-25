@@ -63,3 +63,4 @@ postNewGameR = do
     defaultLayout $ do
         setTitleI MsgNewGame
         $(widgetFile "new-game")
+        $(fayFile "NewGame")

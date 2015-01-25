@@ -85,8 +85,6 @@ setMaxLimit :: Element -> Int -> Fay ()
 setMaxLimit el m = do
     setMax el m
     cur <- getValue el
-    print "current"
-    print cur
     when (readI cur > m) (setValue el m)
 
 setMax :: Element -> Int -> Fay ()
