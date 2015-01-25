@@ -26,3 +26,12 @@ Close: Close
 Goal: The goal of the game is to be the first to cross the finish line.
 Mechanics: When new game is created, all players must join the game for the race to begin. Then, players take turns to move and try to reach the finish line as fast as possible while avoiding crashing into the wall.
 Direction: The direction in which to go is not set and players are free to agree on which direction they want.
+Blurb: In-browser multiplayer turn-based racing game.
+Start: Start new game
+JoinExisting: Join existing game
+JoinMethod: To join an existing game, simply follow the link send to you by the game creator.
+AfterJoin: You will be taken to the game screen, where you can enter your name and join the game.
+AllReady: Once all players joined the game, racing can start.
+HowTo: How to play
+Intro: You control a racing car. The goal is to be the first to cross the finish line.
+BriefRules: The rules of moving are actually pretty simple. The best way to understand them is to start a race with one player and play around with it. Help contains precise description of how it works.

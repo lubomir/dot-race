@@ -1,42 +1,24 @@
 <div .jumbotron>
     <div .container>
-        <h1>Dot Race
-        <p>In-browser multiplayer turn-based racing game.
+        <h1>_{MsgDotRace}
+        <p>_{MsgBlurb}
 
 <div .container>
 
     <div .row>
         <div .col-md-4>
-            <h2>Start new game
+            <h2>_{MsgStart}
             <form enctype=#{enctype} method=POST>
                 ^{widget}
                 <button type="submit" .btn .btn-primary>_{MsgCreateGame}
 
         <div .col-md-4>
-            <h2>Join existing game
-
-            <p>To join an existing game, simply follow the link send to you by the#
-               \ game creator.
-
-            <p>You will be taken to the game screen, where you can enter your name#
-               \ and join the game.
-
-            <p>Once all players joined the game, racing can start.
+            <h2>_{MsgJoinExisting}
+            <p>_{MsgJoinMethod}
+            <p>_{MsgAfterJoin}
+            <p>_{MsgAllReady}
 
         <div .col-md-4>
-            <h2>How to play
-
-            <p>You control a racing car. The goal is to be the first to cross the#
-               \ finish line.
-
-            <p>The rules of moving are actually pretty simple. If you are standing#
-               \ still, you can move to any unoccupied neighbouring spot. If you#
-               \ are moving, you can repeat your last move and choose any neighbour#
-               \ of that spot. Of course, you can not move outside the track or cut#
-               \ a corner.
-
-            <p>Should you have no options where to move, you will crash. Be sure#
-               \ not to do that, as it means the game is over.
-
-            <p>The best way to understand the movement rules is to start a race#
-               \ with one player and play around with it.
+            <h2>_{MsgHowTo}
+            <p>_{MsgIntro}
+            <p>_{MsgBriefRules}
