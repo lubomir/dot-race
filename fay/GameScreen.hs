@@ -207,8 +207,10 @@ initGame _ = do
     setXY (-10) (-10) pointer
     conn <- getWSConnection
 
+    svgViewBox drawing 0 0 (eXMax outerExtents + canvasPadding)
+                           (eYMax outerExtents + canvasPadding)
+
     _ <- subscribe zoom $ \z -> do
-        svgScale z z drawing
         svgSize (z * (eXMax outerExtents + canvasPadding))
                 (z * (eYMax outerExtents + canvasPadding))
                 drawing

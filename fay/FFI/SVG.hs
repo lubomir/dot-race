@@ -43,8 +43,8 @@ setY = ffi "%2['y'](%1)"
 svgMoveFront :: Element -> Fay Element
 svgMoveFront = ffi "%1['front']()"
 
-svgScale :: Double -> Double -> Element -> Fay ()
-svgScale = ffi "%3['scale'](%1, %2)"
-
 svgRemove :: Element -> Fay ()
 svgRemove = ffi "%1['remove']()"
+
+svgViewBox :: Element -> Double -> Double -> Double -> Double -> Fay ()
+svgViewBox = ffi "%1['viewbox'](%2, %3, %4, %5)"
