@@ -118,14 +118,16 @@ getNumPlayers :: Fay Int
 getNumPlayers = ffi "parseInt($('#numPlayers')['val'](), 10)"
 
 displayPlayerJoin :: Int -> Text -> Fay ()
-displayPlayerJoin i name =
-    displaySystemMsg (fromString "<span class='player-" <> showInt i
-                   <> fromString"'>" <> name <> fromString "</span> has joined.")
+displayPlayerJoin = displayPlayerAction (fromString "joined")
 
 displayPlayerQuit :: Int -> Text -> Fay ()
-displayPlayerQuit i name =
+displayPlayerQuit = displayPlayerAction (fromString "left")
+
+displayPlayerAction :: Text -> Int -> Text -> Fay ()
+displayPlayerAction act i name =
     displaySystemMsg (fromString "<span class='player-" <> showInt i
-                   <> fromString"'>" <> name <> fromString "</span> has left.")
+                   <> fromString"'>" <> name <> fromString "</span> has " <> act
+                   <> fromString ".")
 
 displaySystemMsg :: Text -> Fay ()
 displaySystemMsg = displayChatMsg 0 (fromString "System")
