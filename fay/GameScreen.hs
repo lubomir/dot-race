@@ -209,7 +209,7 @@ initGame _ = do
     svgViewBox drawing 0 0 (eXMax outerExtents + canvasPadding)
                            (eYMax outerExtents + canvasPadding)
 
-    _ <- subscribe zoom $ \z -> do
+    _ <- subscribe zoom $ \z ->
         svgSize (z * (eXMax outerExtents + canvasPadding))
                 (z * (eYMax outerExtents + canvasPadding))
                 drawing

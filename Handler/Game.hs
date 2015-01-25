@@ -52,10 +52,9 @@ gameApp gid Game{..} = do
         JoinOk readChan name players -> do
             (sendTextData . serializeCommand . Welcome) (length players)
             mapM_ (sendTextData . serializeCommand . Join) players
-            handle connectionClosed $ do
-                race_
-                    (forever $ atomically (readTChan readChan) >>= sendTextData)
-                    (sourceWS $$ mapM_C (atomically . writeTChan gameChannel))
+            handle connectionClosed $ race_
+                (forever $ atomically (readTChan readChan) >>= sendTextData)
+                (sourceWS $$ mapM_C (atomically . writeTChan gameChannel))
             remaining <- atomically $ do
                 writeTChan gameChannel (serializeCommand (Quit name))
                 removeFromTMVar gamePlayers name
@@ -81,7 +80,7 @@ readMayAdd maxLen x var = do
                 putTMVar var xs'
                 return (Just xs')
 
-removeFromTMVar :: Eq a => TMVar [a] -> a -> STM ([a])
+removeFromTMVar :: Eq a => TMVar [a] -> a -> STM [a]
 removeFromTMVar var x = do
     xs <- takeTMVar var
     let res = delete x xs
