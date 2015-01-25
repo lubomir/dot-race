@@ -316,6 +316,10 @@ initGame _ = do
             (sendText conn . serializeCommand) (Chat (gsThisPlayer s) msg)
             clearChatMessage
 
+    urlField <- selectId "urlField"
+    url <- getURL
+    setTextValue urlField url
+
     return ()
 
 hasWon :: Extremes -> Line -> PlayerTrace -> Bool

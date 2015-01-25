@@ -51,6 +51,9 @@ eventLocation element ev = do
 hide :: Element -> Fay ()
 hide = ffi "%1['remove']()"
 
+getURL :: Fay Text
+getURL = ffi "document['URL']"
+
 getWSConnection :: Fay Connection
 getWSConnection = ffi "new WebSocket(document['URL']['replace']('http', 'ws'))"
 
@@ -95,6 +98,9 @@ getValue = ffi "%1['value']"
 
 setValue :: Element -> Int -> Fay ()
 setValue = ffi "%1['value'] = %2"
+
+setTextValue :: Element -> Text -> Fay ()
+setTextValue = ffi "%1['value'] = %2"
 
 focusElement :: Element -> Fay ()
 focusElement = ffi "%1['focus']()"

@@ -4,7 +4,7 @@
 <div .navbar .navbar-fixed-top .navbar-inverse>
     <div .container-fluid>
         <div .navbar-header>
-            <a .navbar-brand href="/">Dot Race
+            <a .navbar-brand href="/">_{MsgDotRace}
         <div>
             <p .navbar-text>
                 <span #thisPlayerName>
@@ -18,8 +18,8 @@
                         <button type=button .navbar-btn .btn .btn-default #zoom-out>
                             <span .glyphicon .glyphicon-zoom-out>
                 <li>
-                    <a href="#">
-                        Help
+                    <a href="#" data-toggle=modal data-target="#help-dialog">
+                        _{MsgHelp}
 
 <div .container-fluid>
     <div .row>
@@ -36,47 +36,102 @@
             <div .modal-content>
                 <div .modal-header>
                     <h4 .modal-title>
-                        Join game
+                        _{MsgJoinGame}
                 <div .modal-body>
                     <div .form-group>
                         <label .col-sm-2 .control-label for="inputName">
-                            Name
+                            _{MsgName}
                         <div .col-sm-10>
                             <input type=text .form-control #inputName>
                 <div .modal-footer>
                     <button type="submit" .btn .btn-primary>
-                        Join
+                        _{MsgJoin}
 
 <div .modal .fade #crash-dialog role=dialog tabindex=-1>
     <div .modal-dialog>
         <div .modal-content>
             <div .modal-header>
                 <h4 .modal-title>
-                    Game over!
+                    _{MsgGameOver}
             <div .modal-body>
                 <p>
                     <b>
-                        Boom!
-                    You crashed!
+                        _{MsgBoom}
+                    _{MsgYouCrashed}
 
 <div .modal .fade #win-dialog role=dialog tabindex=-1>
     <div .modal-dialog>
         <div .modal-content>
             <div .modal-header>
                 <h4 .modal-title>
-                    Congratulations!
+                    _{MsgCongratulations}
             <div .modal-body>
                 <p>
-                    You won the race!
+                    _{MsgYouWon}
 
 <div .modal .fade #lose-dialog role=dialog tabindex=-1>
     <div .modal-dialog>
         <div .modal-content>
             <div .modal-header>
                 <h4 .modal-title>
-                    Game over!
+                    _{MsgGameOver}
             <div .modal-body>
                 <p>
-                    You lose!
+                    _{MsgYouLose}
                     <b #winner>
-                    won the race.
+                    _{MsgHasWon}
+
+<div .modal .fade #help-dialog role=dialog tabindex=-1>
+    <div .modal-dialog>
+        <div .modal-content>
+            <div .modal-header>
+                <button type="button" .close data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;
+                <h4 .modal-title>_{MsgHelp}
+
+            <div .modal-body>
+
+                <div .tab-panel>
+                    <ul .nav .nav-tabs role=tablist>
+                        <li role=presentation .active>
+                            <a href="#generalRules" role=tab data-toggle=tab>
+                                _{MsgGeneralRules}
+                        <li role=presentation>
+                            <a href="#movement" role=tab data-toggle=tab>
+                                _{MsgMovement}
+                        <li role=presentation>
+                            <a href="#inviting" role=tab data-toggle=tab>
+                                _{MsgInviting}
+
+                    <div .tab-content>
+                        <div role=tabpanel .tab-pane .active #generalRules>
+                            <h3>_{MsgGeneralRules}
+                            <p>_{MsgGoal}
+                            <p>_{MsgMechanics}
+                            <p>_{MsgDirection}
+
+                        <div role=tabpanel .tab-pane #movement>
+
+                            <h3>_{MsgMovement}
+                            <p>_{MsgMoveGeneral}
+                            <p>_{MsgMoveFromStill}
+                            <p .text-center>
+                                <img src=/static/img/first-move.png .img-thumbnail>
+
+                            <p>_{MsgMoveNext}
+                            <p .text-center>
+                                <img src=/static/img/options.png .img-thumbnail>
+
+                            <p>_{MsgMoveObstacle}
+                            <p .text-center>
+                                <img src=/static/img/obstacle.png .img-thumbnail>
+
+                        <div role=tabpanel .tab-pane #inviting>
+
+                            <h3>_{MsgInviting}
+                            <p>_{MsgToInvite}
+                            <input type=text #urlField .form-control .form-control-lg readonly>
+
+            <div .modal-footer>
+                <button type="button" .btn .btn-default data-dismiss="modal">
+                    _{MsgClose}
