@@ -253,12 +253,11 @@ initGame _ = do
                 let curTrace = getNthTrace s n
 
                 drawMove drawing n (ptPath curTrace)
-                when (isReady s) $ do
-                    if gsThisPlayer s == 1
+                when (isReady s) $ if gsThisPlayer s == 1
                         then do
                             displayGameStatus "Choosing next move…"
                             refreshOptions s drawing td (ptPath (getCurrentTrace s)) >>= set options
-                        else displayWaitingFor (gsPlayerNames s !! 0) 1
+                        else displayWaitingFor (head (gsPlayerNames s)) 1
 
             Just (Welcome n) -> do
                 modify state (setThisPlayer n)
@@ -304,7 +303,7 @@ initGame _ = do
     selectId "inputName" >>= focusElement
 
     chatInput <- selectId "chatInput"
-    addEvent chatInput "keydown" $ \e -> do
+    addEvent chatInput "keydown" $ \e ->
         when (eventKey e == 13) $ do
             preventDefault e
             s <- get state

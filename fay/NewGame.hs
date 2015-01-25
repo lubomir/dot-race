@@ -1,8 +1,7 @@
-{-# LANGUAGE RecordWildCards, OverloadedStrings, RebindableSyntax #-}
+{-# LANGUAGE OverloadedStrings, RebindableSyntax #-}
 module NewGame where
 
 import Prelude
-import FFI
 import Data.Text (Text, fromString)
 
 import FFI.Custom
