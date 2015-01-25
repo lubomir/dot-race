@@ -1,0 +1,7 @@
+.jumbotron
+    background-color: #690
+    color: #fff
+
+.jumbotron .container
+    background: url('/static/img/dot-race.png') 90% no-repeat
+    background-size: auto 100%
