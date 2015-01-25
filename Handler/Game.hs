@@ -53,6 +53,10 @@ gameApp _gid Game{..} = do
                 (forever $ atomically (readTChan readChan) >>= sendTextData)
                 (sourceWS $$ mapM_C (atomically . writeTChan gameChannel))
 
+-- |Read a TMVar containing a list. If the list is shorter than given limit,
+-- append a value to it, update the TMVar with it and return new list.
+-- Otherwise return Nothing.
+--
 readMayAdd :: Int -> a -> TMVar [a] -> STM (Maybe [a])
 readMayAdd maxLen x var = do
     xs <- readTMVar var
