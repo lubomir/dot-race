@@ -16,8 +16,6 @@ import Network.Wai.Handler.Warp    (HostPreference)
 import Yesod.Default.Config2       (applyEnvValue, configSettingsYml)
 import Yesod.Default.Util          (WidgetFileSettings, widgetFileNoReload,
                                     widgetFileReload)
-import Yesod.Fay
-import System.Process              (readProcess)
 
 -- | Runtime settings to configure this application. These settings can be
 -- loaded from various sources: defaults, environment variables, config files,
@@ -102,22 +100,6 @@ widgetFile = (if appReloadTemplates compileTimeAppSettings
                 then widgetFileReload
                 else widgetFileNoReload)
               widgetFileSettings
-
-fayFile' :: Exp -> FayFile
-fayFile' staticR moduleName =
-    (if appReloadTemplates compileTimeAppSettings
-        then fayFileReload
-        else fayFileProd)
-     settings
-  where
-    settings = (yesodFaySettings moduleName)
-        { yfsSeparateRuntime = Just ("static", staticR)
-        , yfsPostProcess = readProcess "closure-compiler" []
-        , yfsExternal = Just ("static", staticR)
-        , yfsPackages = ["fay-base", "fay-dom"]
-        , yfsTypecheckDevel = True
-        , yfsRequireJQuery = False
-        }
 
 -- | Raw bytes at compile time of @config/settings.yml@
 configSettingsYmlBS :: ByteString

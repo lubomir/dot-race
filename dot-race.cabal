@@ -21,7 +21,7 @@ library
                      Settings.StaticFiles
                      SharedTypes
                      Handler.Common
-                     Handler.Fay
+                     --Handler.Fay
                      Handler.Home
                      Handler.NewGame
                      Handler.Game
@@ -58,8 +58,8 @@ library
                  , yesod-core                    >= 1.4.0      && < 1.5
                  , yesod-static                  >= 1.4.0.3    && < 1.5
                  , yesod-form                    >= 1.4.0      && < 1.5
-                 , yesod-fay                     >= 0.7        && < 0.8
-                 , fay                           >= 0.21.2.1   && < 0.22
+                 --, yesod-fay                     >= 0.7        && < 0.8
+                 --, fay                           >= 0.21.2.1   && < 0.22
                  , classy-prelude                >= 0.10.2
                  , classy-prelude-conduit        >= 0.10.2
                  , classy-prelude-yesod          >= 0.10.2
@@ -85,7 +85,7 @@ library
                  , containers
                  , vector
                  , time
-                 , fay-dom
+                 --, fay-dom
                  , system-filepath
                  , websockets
                  , yesod-websockets

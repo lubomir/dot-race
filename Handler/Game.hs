@@ -26,7 +26,8 @@ getGameR gid = do
                     defaultLayout $ do
                         setTitleI MsgDotRace
                         $(widgetFile "game-screen")
-                        $(fayFile "GameScreen")
+                        addScript (StaticR js_fay_runtime_js)
+                        addScript (StaticR js_game_screen_js)
 
 data JoinResult = GameFull
                 | JoinOk (TChan Text) Player [Player]

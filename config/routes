@@ -1,5 +1,4 @@
 /static      StaticR  Static  appStatic
-/fay-command FaySiteR FaySite getFaySite
 
 /favicon.ico FaviconR GET
 /robots.txt RobotsR GET

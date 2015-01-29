@@ -19,12 +19,10 @@ import Network.Wai.Middleware.RequestLogger (Destination (Logger),
                                              mkRequestLogger, outputFormat)
 import System.Log.FastLogger                (defaultBufSize, newStdoutLoggerSet,
                                              toLogStr)
-import Yesod.Fay                            (getFaySite)
 
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
 import Handler.Common
-import Handler.Fay
 import Handler.NewGame
 import Handler.Game
 
@@ -46,7 +44,6 @@ makeFoundation appSettings = do
     appStatic <-
         (if appMutableStatic appSettings then staticDevel else static)
         (appStaticDir appSettings)
-    let appFayCommandHandler = onCommand
 
     appTracks <- loadTracks (appTracksDir appSettings)
     appGames <- newIORef mempty

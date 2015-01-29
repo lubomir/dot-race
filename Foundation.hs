@@ -4,7 +4,6 @@ import Import.NoFoundation
 import Text.Hamlet          (hamletFile)
 import Yesod.Core.Types     (Logger)
 import Yesod.Default.Util   (addStaticContentExternal)
-import Yesod.Fay
 
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -15,7 +14,6 @@ data App = App
     , appStatic            :: Static -- ^ Settings for static file serving.
     , appHttpManager       :: Manager
     , appLogger            :: Logger
-    , appFayCommandHandler :: CommandHandler App
     , appTracks            :: Map Text Track
     , appGames             :: IORef (Map GameId Game)
     }
@@ -94,15 +92,6 @@ instance Yesod App where
             || level == LevelError
 
     makeLogger = return . appLogger
-
-instance YesodJquery App
-instance YesodFay App where
-
-    fayRoute = FaySiteR
-
-    yesodFayCommand render command = do
-        master <- getYesod
-        appFayCommandHandler master render command
 
 mkMessage "App" "messages" "en"
 

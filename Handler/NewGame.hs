@@ -29,7 +29,8 @@ getNewGameR = do
     (widget, enctype) <- generateFormPost newGameForm
     defaultLayout $ do
         setTitleI MsgNewGame
-        $(fayFile "NewGame")
+        addScript (StaticR js_fay_runtime_js)
+        addScript (StaticR js_new_game_js)
         $(widgetFile "new-game")
 
 hasCorrectValFor :: FormResult Track -> Int -> Handler (Either Text Int)
@@ -63,4 +64,5 @@ postNewGameR = do
     defaultLayout $ do
         setTitleI MsgNewGame
         $(widgetFile "new-game")
-        $(fayFile "NewGame")
+        addScript (StaticR js_fay_runtime_js)
+        addScript (StaticR js_new_game_js)
