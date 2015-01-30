@@ -1,8 +1,10 @@
-import Prelude     (IO, (>>=), print)
+import Prelude     (IO, (>>=), print, (++))
 import Application (appMain)
 import System.Directory
+import System.Environment
 
 main :: IO ()
 main = do
-    getCurrentDirectory >>= print
+    baseDir <- getEnv "OPENSHIFT_DEPLOYMENTS_DIR"
+    setCurrentDirectory (baseDir ++ "current/repo/")
     appMain
