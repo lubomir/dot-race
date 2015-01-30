@@ -152,6 +152,14 @@ data GameState = GameState { gsTraces :: [PlayerTrace]
                            , gsThisPlayer :: Int
                            }
 
+findPlayerId :: [Text] -> Text -> Int
+findPlayerId xs name = go 1 xs
+  where
+    go acc [] = 0
+    go acc (x:xs)
+        | x == name = acc
+        | otherwise = go (acc + 1) xs
+
 addPlayer :: Text -> [Point] -> GameState -> GameState
 addPlayer n starts s@(GameState ts ps _ _ _) =
     let num = length ts
@@ -265,7 +273,7 @@ initGame _ = do
 
             Just (Quit name) -> do
                 s <- get state
-                let n = length (gsPlayerNames s)
+                let n = findPlayerId (gsPlayerNames s) name
                 displayPlayerQuit n name
 
             Just (Welcome n) -> do
