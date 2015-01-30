@@ -13,7 +13,7 @@ import SharedTypes
 import Geometry
 
 loadTracks :: FilePath -> IO (Map Text Track)
-loadTracks dir = do
+loadTracks dir = return M.empty {-do
     files <- map fromString <$> getDirectoryContents (fpToString dir)
     M.fromList <$> mapM loadTrack (filter isYaml files)
   where
@@ -28,7 +28,7 @@ loadTracks dir = do
     getName :: FilePath -> Text
     getName = toTitle . replace "-" " " . either id id . toText . basename
 
-    isYaml p = p `hasExtension` "yaml"
+    isYaml p = p `hasExtension` "yaml"-}
 
 
 -- | Move track so that there is no empty space on the left or above it.
