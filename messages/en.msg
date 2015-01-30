@@ -9,7 +9,7 @@ Name: Name
 Join: Join
 GameOver: Game Over!
 Boom: Boom!
-YouCrashed: You crashed! It's over for you.
+Crash: There was an accident on the track! The race is over!
 Congratulations: Congratulations!
 YouWon: You won the race!
 YouLose: You lose!

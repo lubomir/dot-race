@@ -49,12 +49,14 @@ postNewGameR = do
     ((res, widget), enctype) <- runFormPost newGameForm
     case res of
         FormSuccess g -> do
-            chan <- atomically newBroadcastTChan
-            players <- atomically $ newTMVar []
+            (chan, players, started) <- atomically ((,,) <$> newBroadcastTChan
+                                                         <*> newTMVar []
+                                                         <*> newTMVar False)
             let game = Game { gameTrack = track g
                             , gameNumPlayers = numPlayers g
                             , gamePlayers = players
                             , gameChannel = chan
+                            , gameStarted = started
                             }
             games <- appGames <$> getYesod
             gameId <- liftIO mkGameId

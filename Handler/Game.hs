@@ -43,9 +43,15 @@ gameApp gid Game{..} = do
             case mplayers of
                 Nothing -> return GameFull
                 Just players -> do
-                    writeTChan gameChannel (serializeCommand (Join name))
-                    c <- dupTChan gameChannel
-                    return (JoinOk c name players)
+                    started <- readTMVar gameStarted
+                    if started
+                        then return GameFull
+                        else do
+                            when (length players == gameNumPlayers)
+                                (void $ swapTMVar gameStarted True)
+                            writeTChan gameChannel (serializeCommand (Join name))
+                            c <- dupTChan gameChannel
+                            return (JoinOk c name players)
         _ -> return InvalidCommand
     case res of
         GameFull -> send (System "Game is full already.")

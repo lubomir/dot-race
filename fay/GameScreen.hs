@@ -152,6 +152,14 @@ data GameState = GameState { gsTraces :: [PlayerTrace]
                            , gsThisPlayer :: Int
                            }
 
+findPlayerId :: [Text] -> Text -> Int
+findPlayerId xs name = go 1 xs
+  where
+    go acc [] = 0
+    go acc (x:xs)
+        | x == name = acc
+        | otherwise = go (acc + 1) xs
+
 addPlayer :: Text -> [Point] -> GameState -> GameState
 addPlayer n starts s@(GameState ts ps _ _ _) =
     let num = length ts
@@ -179,6 +187,9 @@ getCurrentPlayerName s = getNthPlayerName s (gsCurrentPlayer s)
 
 getNthTrace :: GameState -> Int -> PlayerTrace
 getNthTrace s n = gsTraces s !! (n - 1)
+
+getCurrentPlayerTrace :: GameState -> PlayerTrace
+getCurrentPlayerTrace s = getNthTrace s (gsCurrentPlayer s)
 
 setIx :: Int -> a -> [a] -> [a]
 setIx 1 x (_:ys) = x:ys
@@ -262,7 +273,7 @@ initGame _ = do
 
             Just (Quit name) -> do
                 s <- get state
-                let n = length (gsPlayerNames s)
+                let n = findPlayerId (gsPlayerNames s) name
                 displayPlayerQuit n name
 
             Just (Welcome n) -> do
@@ -286,7 +297,9 @@ initGame _ = do
                         s <- get state
                         when (thisIsCurrentPlayer s) $ do
                             let curTrace = getCurrentTrace s
-                            refreshOptions s drawing td (ptPath curTrace) >>= set options
+                            opts <- refreshOptions s drawing td (ptPath curTrace)
+                            when (null opts) (sendText conn $ serializeCommand Crashed)
+                            set options opts
                         if gsCurrentPlayer s == gsThisPlayer s
                             then displayGameStatus "Choosing next move…"
                             else displayWaitingFor (getCurrentPlayerName s) (gsCurrentPlayer s)
@@ -294,6 +307,11 @@ initGame _ = do
             Just (Chat pId msg) -> do
                 s <- get state
                 displayChatMsg pId (getNthPlayerName s pId) msg
+
+            Just Crashed -> do
+                s <- get state
+                drawCrash drawing (head $ ptPath $ getCurrentPlayerTrace s)
+                showCrashDialog
 
             Just (System msg) -> displaySystemMsg msg
 

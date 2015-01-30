@@ -57,7 +57,7 @@
                 <p>
                     <b>
                         _{MsgBoom}
-                    _{MsgYouCrashed}
+                    _{MsgCrash}
 
 <div .modal .fade #win-dialog role=dialog tabindex=-1>
     <div .modal-dialog>

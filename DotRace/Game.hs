@@ -14,6 +14,7 @@ data Game = Game { gameTrack :: Track
                  , gameNumPlayers :: Int
                  , gamePlayers :: TMVar [Player]
                  , gameChannel :: TChan Text
+                 , gameStarted :: TMVar Bool
                  }
 
 mkGameId :: IO GameId
