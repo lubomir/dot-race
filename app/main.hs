@@ -1,4 +1,4 @@
-import Prelude     (IO, (>>=), print, (++))
+import Prelude     (IO, (++))
 import Application (appMain)
 import System.Directory
 import System.Environment
