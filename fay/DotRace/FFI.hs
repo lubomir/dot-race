@@ -37,7 +37,7 @@ setMaxLimit el m = do
     when (readI cur > m) (setValue el m)
 
 showCrashDialog :: Fay ()
-showCrashDialog = showDialog "crashDialog"
+showCrashDialog = showDialog "crash-dialog"
 
 displayPlayerJoin :: Int -> Text -> Fay ()
 displayPlayerJoin = displayPlayerAction "joined"

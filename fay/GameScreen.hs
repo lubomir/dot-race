@@ -180,6 +180,9 @@ getCurrentPlayerName s = getNthPlayerName s (gsCurrentPlayer s)
 getNthTrace :: GameState -> Int -> PlayerTrace
 getNthTrace s n = gsTraces s !! (n - 1)
 
+getCurrentPlayerTrace :: GameState -> PlayerTrace
+getCurrentPlayerTrace s = getNthTrace s (gsCurrentPlayer s)
+
 setIx :: Int -> a -> [a] -> [a]
 setIx 1 x (_:ys) = x:ys
 setIx n x (y:ys) = y : setIx (n-1) x ys
@@ -286,7 +289,9 @@ initGame _ = do
                         s <- get state
                         when (thisIsCurrentPlayer s) $ do
                             let curTrace = getCurrentTrace s
-                            refreshOptions s drawing td (ptPath curTrace) >>= set options
+                            opts <- refreshOptions s drawing td (ptPath curTrace)
+                            when (null opts) (sendText conn $ serializeCommand Crashed)
+                            set options opts
                         if gsCurrentPlayer s == gsThisPlayer s
                             then displayGameStatus "Choosing next move…"
                             else displayWaitingFor (getCurrentPlayerName s) (gsCurrentPlayer s)
@@ -294,6 +299,11 @@ initGame _ = do
             Just (Chat pId msg) -> do
                 s <- get state
                 displayChatMsg pId (getNthPlayerName s pId) msg
+
+            Just Crashed -> do
+                s <- get state
+                drawCrash drawing (head $ ptPath $ getCurrentPlayerTrace s)
+                showCrashDialog
 
             Just (System msg) -> displaySystemMsg msg
 
