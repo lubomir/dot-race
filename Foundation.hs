@@ -38,7 +38,7 @@ type Form x = Html -> MForm (HandlerT App IO) (FormResult x, Widget)
 instance Yesod App where
     -- Controls the base of generated URLs. For more information on modifying,
     -- see: https://github.com/yesodweb/yesod/wiki/Overriding-approot
-    approot = ApprootMaster $ appRoot . appSettings
+    approot = ApprootMaster ("http://" <> appRoot . appSettings)
 
     -- Store session data on the client in encrypted cookies,
     -- default session idle timeout is 120 minutes

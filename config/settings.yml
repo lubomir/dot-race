@@ -4,7 +4,7 @@
 static-dir:     "_env:STATIC_DIR:static"
 host:           "_env:OPENSHIFT_HASKELL_IP:*4" # any IPv4 host
 port:           "_env:OPENSHIFT_HASKELL_PORT:3000"
-approot:        "_env:APPROOT:http://dotrace2-lsedlar.rhcloud.com"
+approot:        "_env:OPENSHIFT_APP_DNS:http://localhost:3000"
 ip-from-header: "_env:IP_FROM_HEADER:false"
 
 # Optional values with the following production defaults.
