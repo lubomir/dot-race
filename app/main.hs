@@ -1,7 +1,8 @@
-import Prelude     (IO)
+import Prelude     (IO, (>>=), print)
 import Application (appMain)
-import System.Environment
+import System.Directory
 
 main :: IO ()
 main = do
+    getCurrentDirectory >>= print
     appMain

@@ -84,7 +84,6 @@ library
                  , yesod-websockets
                  , random
                  , stm
-                 , directory
 
 executable         server
     if flag(library-only)
@@ -92,7 +91,7 @@ executable         server
 
     main-is:           main.hs
     hs-source-dirs:    app
-    build-depends:     base, dot-race
+    build-depends:     base, dot-race, directory
 
     ghc-options:       -threaded -O2 -rtsopts -with-rtsopts=-N
 
