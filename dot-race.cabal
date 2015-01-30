@@ -84,6 +84,7 @@ library
                  , yesod-websockets
                  , random
                  , stm
+                 , directory
 
 executable         server
     if flag(library-only)
